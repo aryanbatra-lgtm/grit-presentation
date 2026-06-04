@@ -611,9 +611,81 @@ html,body{width:100%;height:100%;background:var(--paper);font-family:'DM Sans',s
  </div>
 </div>
 
-<!-- ══ S7 · STAGE 3: MEMORY & IMPROVEMENT ══════════════════════════════════ -->
+<!-- ══ S7A · STAGE 3: MEMORY & IMPROVEMENT ══════════════════════════════════ -->
 <div class="slide" id="s7" style="padding:44px 64px;justify-content:center">
- <p class="ey a1">Stage 3 · Auto-Heal</p>
+ <p class="ey a1">Stage 3A · Memory Loop</p>
+ <h2 class="a2" style="font-family:'Fraunces',serif;font-size:1.75rem;font-weight:600;letter-spacing:-.02em;color:var(--ink);margin:8px 0">Memory &amp; Improvement Loop</h2>
+ <div style="display:grid;grid-template-columns:1fr 1.1fr;gap:32px;margin-top:22px" class="a3">
+  <div class="steps">
+   <div class="step act">
+    <div class="sn">1</div>
+    <div>
+     <h4>Rejected questions are stored</h4>
+     <p>Every question that fails validation is logged — not discarded. The failure reason is stored alongside the question itself.</p>
+    </div>
+   </div>
+   <div class="step act">
+    <div class="sn">2</div>
+    <div>
+     <h4>Agent learns from the failures</h4>
+     <p>Before the next generation run, the agent reviews the rejection log. It uses this context to adjust its approach and avoid the same patterns.</p>
+    </div>
+   </div>
+   <div class="step act">
+    <div class="sn">3</div>
+    <div>
+     <h4>Quality improves with each run</h4>
+     <p>First-time pass rate goes up over time. Fewer rejections mean faster pool fill. The system becomes more efficient without any additional human input.</p>
+    </div>
+   </div>
+   <div class="step act">
+    <div class="sn">4</div>
+    <div>
+     <h4>Compound improvement loop</h4>
+     <p>This is not a one-time generation — it's a continuously self-improving system. Each cycle makes the next one better.</p>
+    </div>
+   </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:14px">
+   <div class="cpp asc">
+    <div class="cpp-hd">
+     <div class="cpp-dots">
+      <div class="cpp-dot" style="background:#f87171"></div>
+      <div class="cpp-dot" style="background:#fbbf24"></div>
+      <div class="cpp-dot" style="background:#34d399"></div>
+     </div>
+     <div class="cpp-ttl">Memory log entry</div>
+    </div>
+    <div class="cpp-rows">
+     <div class="cpp-row">
+      <span class="cpp-c">question_id</span>
+      <span class="tag t-fail">Rejected</span>
+     </div>
+     <div class="cpp-row">
+      <span class="cpp-c">failure_reason</span>
+      <span class="tag t-adm">Logged</span>
+     </div>
+     <div class="cpp-row">
+      <span class="cpp-c">skill_tag</span>
+      <span class="tag t-acc">Tracked</span>
+     </div>
+     <div class="cpp-row">
+      <span class="cpp-c">pattern_flag</span>
+      <span class="tag t-ai">Learned</span>
+     </div>
+    </div>
+   </div>
+   <div style="padding:16px 18px;background:var(--p2);border:1px solid var(--p3);border-radius:var(--r);font-size:.8rem;line-height:1.6;color:var(--ink2)">
+    <strong style="display:block;margin-bottom:4px;color:var(--ink)">Why this matters</strong>
+    The system doesn't just get told what's wrong — it actively incorporates that feedback into future behaviour. Over time, rejection rates fall and first-pass quality rises automatically.
+   </div>
+  </div>
+ </div>
+</div>
+
+<!-- ══ S7B · STAGE 3: AUTO-HEAL ══════════════════════════════════ -->
+<div class="slide" id="s8" style="padding:44px 64px;justify-content:center">
+ <p class="ey a1">Stage 3B · Auto-Heal</p>
  <h2 class="a2" style="font-family:'Fraunces',serif;font-size:1.75rem;font-weight:600;letter-spacing:-.02em;color:var(--ink);margin:8px 0">Failed questions don't get discarded. They get fixed.</h2>
  <div style="display:grid;grid-template-columns:1fr 1.1fr;gap:32px;margin-top:22px" class="a3">
   <div class="steps">
@@ -688,7 +760,7 @@ html,body{width:100%;height:100%;background:var(--paper);font-family:'DM Sans',s
 </div>
 
 <!-- ══ S8 · SAMPLE OUTPUT ══════════════════════════════════ -->
-<div class="slide" id="s8" style="padding:48px 64px;justify-content:center">
+<div class="slide" id="s9" style="padding:48px 64px;justify-content:center">
  <p class="ey a1">What It Produces</p>
  <h2 class="a2" style="font-family:'Fraunces',serif;font-size:1.85rem;font-weight:600;letter-spacing:-.02em;color:var(--ink);margin:8px 0 20px">A sample generated question</h2>
  <div style="display:grid;grid-template-columns:1.1fr 1fr;gap:24px" class="a3">
@@ -761,7 +833,7 @@ html,body{width:100%;height:100%;background:var(--paper);font-family:'DM Sans',s
 </div>
 
 <!-- ══ S9 · WHAT HUMANS STILL DO ══════════════════════════════════ -->
-<div class="slide" id="s9" style="padding:52px 68px;justify-content:center">
+<div class="slide" id="s10" style="padding:52px 68px;justify-content:center">
  <p class="ey a1">Human Role</p>
  <h2 class="a2" style="font-family:'Fraunces',serif;font-size:2rem;font-weight:600;letter-spacing:-.02em;color:var(--ink);margin:8px 0 28px;line-height:1.2">Humans are not out of the loop.<br/>Their role just changed.</h2>
  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px" class="a3">
@@ -806,7 +878,7 @@ html,body{width:100%;height:100%;background:var(--paper);font-family:'DM Sans',s
 </div>
 
 <!-- ══ S10 · SCALE IMPACT + METRICS ══════════════════════════════════ -->
-<div class="slide" id="s10" style="padding:48px 64px;justify-content:center">
+<div class="slide" id="s11" style="padding:48px 64px;justify-content:center">
  <p class="ey a1">Impact</p>
  <h2 class="a2" style="font-family:'Fraunces',serif;font-size:1.85rem;font-weight:600;letter-spacing:-.02em;color:var(--ink);margin:8px 0 20px">One workflow. Ten skills. Continuously improving.</h2>
  <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border:1px solid var(--p3);border-radius:12px;overflow:hidden;margin-bottom:18px" class="a3">
@@ -846,7 +918,7 @@ html,body{width:100%;height:100%;background:var(--paper);font-family:'DM Sans',s
 </div>
 
 <!-- ══ S11 · ON RISK ══════════════════════════════════ -->
-<div class="slide" id="s11" style="padding:52px 68px;justify-content:center">
+<div class="slide" id="s12" style="padding:52px 68px;justify-content:center">
  <p class="ey a1">On Risk</p>
  <h2 class="a2" style="font-family:'Fraunces',serif;font-size:2rem;font-weight:600;letter-spacing:-.02em;color:var(--ink);margin:8px 0 24px;line-height:1.2">Every decision is logged.<br/>Nothing is a black box.</h2>
  <div style="display:grid;grid-template-columns:1.1fr 1fr;gap:28px" class="a3">
@@ -899,7 +971,7 @@ html,body{width:100%;height:100%;background:var(--paper);font-family:'DM Sans',s
 
 
 <!-- ══ S12 · THANK YOU ══════════════════════════════════ -->
-<div class="slide" id="s12">
+<div class="slide" id="s13">
  <div style="display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:100px 120px;height:100%">
   <p class="ey a1" style="margin-bottom:16px">NxtWave · Learning Pod</p>
   <h1 class="a2" style="font-family:'Fraunces',serif;font-size:5rem;font-weight:700;line-height:1.05;letter-spacing:-.03em;color:var(--ink);margin:0 0 28px">Thank<br/><em style="font-style:italic;color:var(--acc)">you.</em></h1>
