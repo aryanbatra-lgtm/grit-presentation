@@ -912,15 +912,20 @@ html,body{width:100%;height:100%;background:var(--paper);font-family:'DM Sans',s
 
 <script>
 const slides=document.querySelectorAll('.slide'),dots=document.getElementById('dots'),ctr=document.getElementById('ctr');
-let c=0,busy=false;
 const AS='.a1,.a2,.a3,.a4,.a5,.a6,.a7,.a8,.a9,.af1,.asc';
+const STORE='grit-slide';
 
-slides.forEach((_,i)=>{const d=document.createElement('div');d.className='dot'+(i===0?' on':'');d.onclick=()=>go(i);dots.appendChild(d);});
-ctr.textContent=`1 / ${slides.length}`;
+// Restore last slide from localStorage, clamp to valid range
+let c=Math.min(parseInt(localStorage.getItem(STORE)||'0',10),slides.length-1);
+let busy=false;
 
-// Animate first slide in
-gsap.to(slides[0],{opacity:1,duration:0.01});
-gsap.to(slides[0].querySelectorAll(AS),{opacity:1,y:0,duration:0.5,ease:'power3.out',stagger:0.07,delay:0.1});
+slides.forEach((_,i)=>{const d=document.createElement('div');d.className='dot'+(i===c?' on':'');d.onclick=()=>go(i);dots.appendChild(d);});
+ctr.textContent=`${c+1} / ${slides.length}`;
+
+// Activate restored slide and animate it in
+slides[c].classList.add('on');
+gsap.to(slides[c],{opacity:1,duration:0.01});
+gsap.to(slides[c].querySelectorAll(AS),{opacity:1,y:0,duration:0.5,ease:'power3.out',stagger:0.07,delay:0.1});
 
 function go(n){
   if(busy)return;
@@ -934,6 +939,7 @@ function go(n){
   c=n;
   dots.children[c].classList.add('on');
   ctr.textContent=`${c+1} / ${slides.length}`;
+  localStorage.setItem(STORE,c);
 
   // prep incoming
   gsap.set(ins,{opacity:0,y:dir*24});
