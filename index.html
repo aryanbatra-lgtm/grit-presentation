@@ -1,0 +1,977 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GRIT · Practice Agentic Flow</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,500;0,9..144,700;1,9..144,400;1,9..144,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap"/>
+<style>
+:root {
+  --paper:   #f9f7f3;
+  --p2:      #f2ede3;
+  --p3:      #e8e0d0;
+  --p4:      #ddd5c4;
+  --ink:     #1a1714;
+  --ink2:    #403b35;
+  --ink3:    #7a7068;
+  --ink4:    #b0a898;
+  --acc:     #3d35b8;
+  --acc2:    #5b54d4;
+  --acc-bg:  #eeeeff;
+  --acc-bd:  #c5c2f5;
+  --sage:    #3d6b5e;
+  --sage-bg: #eaf3f0;
+  --sage-bd: #aacfc6;
+  --rose:    #b03a3a;
+  --rose-bg: #fdf0f0;
+  --rose-bd: #f0bfbf;
+  --amr:     #8a4a0e;
+  --amr-bg:  #fef8ed;
+  --amr-bd:  #f8d9a0;
+  --sky:     #1a6696;
+  --sky-bg:  #edf6fc;
+  --sky-bd:  #9fd4f0;
+  --W: 1280px; --H: 720px;
+  --r: 10px;
+  --ease: cubic-bezier(0.22,1,0.36,1);
+  --shadow: 0 1px 3px rgba(0,0,0,.06), 0 4px 12px rgba(0,0,0,.05);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:clamp(15px,1.25vw,22px)}
+html,body{width:100%;height:100%;background:var(--paper);font-family:'DM Sans',sans-serif;overflow:hidden;-webkit-font-smoothing:antialiased;color:var(--ink)}
+#deck{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+.vp{width:100vw;height:100vh;position:relative;overflow:hidden;border-radius:0}
+.slide{position:absolute;inset:0;background:var(--paper);display:flex;flex-direction:column;opacity:0;pointer-events:none}
+.slide.on{pointer-events:all}
+.slide .a1,.slide .a2,.slide .a3,.slide .a4,.slide .a5,.slide .a6,.slide .a7,.slide .a8,.slide .a9,.slide .af1,.slide .asc{opacity:0}
+@media(prefers-reduced-motion:reduce){.slide .a1,.slide .a2,.slide .a3,.slide .a4,.slide .a5,.slide .a6,.slide .a7,.slide .a8,.slide .a9,.slide .af1,.slide .asc{opacity:1}}
+
+/* NAV */
+#nav{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(10px);display:flex;align-items:center;gap:12px;background:rgba(255,255,255,.9);backdrop-filter:blur(20px);border:1px solid rgba(0,0,0,.09);border-radius:40px;padding:8px 18px;box-shadow:0 4px 20px rgba(0,0,0,.12);z-index:100;opacity:0;pointer-events:none;transition:opacity .25s ease,transform .3s ease}
+#nav.ui-on{opacity:1;pointer-events:all;transform:translateX(-50%) translateY(0)}
+#nav button{background:none;border:none;cursor:pointer;font-family:'DM Sans',sans-serif;font-size:.8rem;font-weight:500;color:var(--ink3);padding:5px 12px;border-radius:20px;transition:.15s}
+#nav button:hover{background:var(--p2);color:var(--ink)}
+#dots{display:flex;gap:5px;align-items:center}
+.dot{width:5px;height:5px;border-radius:50%;background:var(--p3);cursor:pointer;transition:all .2s var(--ease)}
+.dot.on{background:var(--acc);width:16px;border-radius:3px}
+#ctr{font-family:'DM Mono',monospace;font-size:.68rem;color:var(--ink4);min-width:44px;text-align:center}
+#kbh{position:fixed;top:16px;right:20px;font-family:'DM Mono',monospace;font-size:.65rem;color:#b0a898;letter-spacing:.04em}
+#fsb{position:fixed;top:12px;left:20px;background:rgba(255,255,255,.82);backdrop-filter:blur(12px);border:1px solid rgba(0,0,0,.08);border-radius:8px;padding:5px 8px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:100;transition:opacity .2s ease,background .15s;color:var(--ink3);opacity:0;pointer-events:none}
+#fsb.ui-on{opacity:1;pointer-events:all}
+#fsb:hover{background:rgba(255,255,255,.96);color:var(--ink)}
+
+/* SHARED */
+.ey{font-family:'DM Mono',monospace;font-size:.66rem;font-weight:500;letter-spacing:.14em;text-transform:uppercase;color:var(--acc)}
+.tag{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:.62rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;font-family:'DM Mono',monospace;border:1px solid}
+.t-ai{background:var(--sky-bg);color:var(--sky);border-color:var(--sky-bd)}
+.t-auto{background:var(--sage-bg);color:var(--sage);border-color:var(--sage-bd)}
+.t-adm{background:var(--amr-bg);color:var(--amr);border-color:var(--amr-bd)}
+.t-acc{background:var(--acc-bg);color:var(--acc);border-color:var(--acc-bd)}
+.t-fail{background:var(--rose-bg);color:var(--rose);border-color:var(--rose-bd)}
+
+
+/* SCREENSHOT frame */
+.ss-frame{
+  border-radius:10px;overflow:hidden;
+  border:1px solid var(--p3);
+  box-shadow:0 2px 16px rgba(0,0,0,.08),0 1px 4px rgba(0,0,0,.06);
+  position:relative;
+}
+.ss-frame img{width:100%;height:100%;object-fit:cover;object-position:top left;display:block}
+.ss-badge{
+  position:absolute;bottom:10px;right:10px;
+  background:rgba(255,255,255,.92);backdrop-filter:blur(8px);
+  border:1px solid rgba(0,0,0,.08);border-radius:20px;
+  padding:3px 10px;font-size:.62rem;font-weight:600;
+  color:var(--ink3);font-family:'DM Mono',monospace;letter-spacing:.04em;
+}
+
+/* ══════════════════════════════════
+   SLIDE 1 · TITLE
+══════════════════════════════════ */
+#s1{flex-direction:row;overflow:hidden}
+#s1 .l{flex:0 0 45%;display:flex;flex-direction:column;justify-content:center;padding:68px 60px;position:relative;z-index:1}
+#s1 .r{flex:1;background:var(--acc);position:relative;overflow:hidden;display:flex;align-items:center;justify-content:center;padding:40px}
+#s1 .bg-g{position:absolute;right:-30px;bottom:-50px;font-family:'Fraunces',serif;font-size:300px;font-weight:700;line-height:1;color:rgba(255,255,255,.07);pointer-events:none;user-select:none}
+#s1 h1{font-family:'Fraunces',serif;font-size:3.6rem;font-weight:700;line-height:1.05;letter-spacing:-.025em;color:var(--ink);margin:10px 0 18px}
+#s1 h1 em{font-style:italic;color:var(--acc)}
+#s1 .sub{font-size:.9rem;line-height:1.7;color:var(--ink3);max-width:430px;margin-bottom:36px}
+#s1 .mg{display:grid;grid-template-columns:1fr 1px 1fr 1px 1fr;border:1px solid var(--p3);border-radius:9px;overflow:hidden}
+#s1 .mc{padding:13px 16px;background:var(--p2)}
+#s1 .mc:nth-child(even){background:var(--p3);width:1px}
+#s1 .ml{font-size:.58rem;font-family:'DM Mono',monospace;letter-spacing:.1em;text-transform:uppercase;color:var(--ink4);margin-bottom:3px}
+#s1 .mv{font-size:.8rem;font-weight:500;color:var(--ink2)}
+/* right panel: stacked screenshots */
+#s1 .r-inner{position:relative;z-index:1;width:100%;display:flex;flex-direction:column;gap:10px}
+#s1 .pill-strip{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:4px}
+#s1 .pill{background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:4px 12px;font-size:.7rem;font-weight:500;color:rgba(255,255,255,.88)}
+#s1 .ss-stack{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+#s1 .ss-stack .ss-frame{height:148px}
+#s1 .ss-label{font-family:'DM Mono',monospace;font-size:.58rem;color:rgba(255,255,255,.45);text-align:center;margin-top:-4px;letter-spacing:.05em}
+
+/* ══════════════════════════════════
+   SLIDE 2 · PROBLEM
+══════════════════════════════════ */
+#s2{padding:52px 68px;justify-content:center}
+#s2 h2{font-family:'Fraunces',serif;font-size:2rem;font-weight:600;letter-spacing:-.02em;color:var(--ink);margin:8px 0 28px;line-height:1.2}
+#s2 .g{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
+.pc{background:var(--p2);border:1px solid var(--p3);border-radius:var(--r);padding:26px 22px;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden}
+.pc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
+.pc.r1::before{background:var(--rose)}
+.pc.r2::before{background:var(--amr)}
+.pc.r3::before{background:var(--sky)}
+.pn{font-family:'Fraunces',serif;font-size:3.4rem;font-weight:700;line-height:1;letter-spacing:-.04em}
+.pc.r1 .pn{color:var(--rose)}
+.pc.r2 .pn{color:var(--amr)}
+.pc.r3 .pn{color:var(--sky)}
+.pc h3{font-size:.95rem;font-weight:600;color:var(--ink)}
+.pc p{font-size:.78rem;line-height:1.55;color:var(--ink3)}
+#s2 .bs{margin-top:18px;padding:16px 22px;background:var(--acc-bg);border:1px solid var(--acc-bd);border-radius:var(--r);display:flex;gap:14px;align-items:center;font-size:.82rem;color:var(--acc);font-weight:500}
+
+/* ══════════════════════════════════
+   SLIDE 3 · WHAT IS GRIT
+══════════════════════════════════ */
+#s3{flex-direction:row;overflow:hidden}
+#s3 .l{flex:0 0 42%;display:flex;flex-direction:column;justify-content:center;padding:60px 56px;border-right:1px solid var(--p3)}
+#s3 .r{flex:1;display:flex;flex-direction:column;justify-content:center;padding:44px 48px;gap:14px}
+#s3 h2{font-family:'Fraunces',serif;font-size:2.3rem;font-weight:600;line-height:1.2;letter-spacing:-.02em;color:var(--ink);margin:10px 0 18px}
+#s3 h2 em{font-style:italic;color:var(--acc)}
+#s3 .def{font-size:.88rem;line-height:1.7;color:var(--ink2);max-width:400px}
+#s3 .an{margin-top:22px;padding:15px 18px;background:var(--amr-bg);border:1px solid var(--amr-bd);border-radius:var(--r);font-size:.78rem;line-height:1.55;color:var(--amr)}
+.prop{background:var(--p2);border:1px solid var(--p3);border-radius:var(--r);padding:18px 20px;display:flex;gap:14px;align-items:flex-start}
+.pi{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.prop h4{font-size:.85rem;font-weight:600;color:var(--ink);margin-bottom:3px}
+.prop p{font-size:.74rem;color:var(--ink3);line-height:1.5}
+
+/* ══════════════════════════════════
+   SLIDE 4 · BIG PICTURE
+══════════════════════════════════ */
+#s4{padding:48px 64px;justify-content:center}
+#s4 h2{font-family:'Fraunces',serif;font-size:1.85rem;font-weight:600;letter-spacing:-.02em;color:var(--ink);margin:8px 0}
+#s4 .phs{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0;margin-top:28px;border:1px solid var(--p3);border-radius:12px;overflow:hidden}
+.ph{padding:28px 24px;border-right:1px solid var(--p3);display:flex;flex-direction:column;gap:9px;position:relative}
+.ph:last-child{border-right:none}
+.ph.hl{background:var(--acc)}
+.ph.hl *{color:white!important}
+.ph.hl .ph-w{background:rgba(255,255,255,.18)!important;border-color:rgba(255,255,255,.3)!important;color:white!important}
+.ph-bar{position:absolute;top:0;left:0;right:0;height:3px}
+.b1{background:var(--amr)} .b2{background:var(--acc2)} .b3{background:var(--sage)} .b4{background:var(--sky)}
+.ph-n{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;color:var(--ink4)}
+.ph h3{font-family:'Fraunces',serif;font-size:1.1rem;font-weight:600;color:var(--ink);line-height:1.2}
+.ph p{font-size:.74rem;color:var(--ink3);line-height:1.5}
+.ph-w{display:inline-flex;align-items:center;gap:5px;padding:3px 9px;border-radius:20px;font-size:.6rem;font-weight:600;letter-spacing:.08em;text-transform:uppercase;font-family:'DM Mono',monospace;margin-top:4px;align-self:flex-start;border:1px solid}
+.wa{background:var(--amr-bg);color:var(--amr);border-color:var(--amr-bd)}
+.wai{background:var(--sky-bg);color:var(--sky);border-color:var(--sky-bd)}
+.wau{background:var(--sage-bg);color:var(--sage);border-color:var(--sage-bd)}
+#s4 .nt{margin-top:20px;padding:15px 20px;background:var(--p2);border:1px solid var(--p3);border-radius:var(--r);display:flex;gap:12px;align-items:center;font-size:.8rem;color:var(--ink2);line-height:1.55}
+#s4 .nt strong{color:var(--ink)}
+
+/* ══════════════════════════════════
+   SLIDE 5 · PHASE 0
+══════════════════════════════════ */
+#s5{padding:44px 64px;justify-content:center}
+#s5 h2{font-family:'Fraunces',serif;font-size:1.75rem;font-weight:600;letter-spacing:-.02em;color:var(--ink);margin:8px 0}
+#s5 .g{display:grid;grid-template-columns:1fr 1.1fr;gap:32px;margin-top:22px}
+.steps{display:flex;flex-direction:column;position:relative}
+.steps::before{content:'';position:absolute;left:17px;top:26px;bottom:26px;width:1px;background:linear-gradient(to bottom,var(--acc-bd),var(--p3))}
+.step{display:flex;gap:16px;align-items:flex-start;padding:10px 0}
+.sn{width:34px;height:34px;border-radius:50%;background:var(--paper);border:1.5px solid var(--p3);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:.7rem;font-weight:500;color:var(--ink3);flex-shrink:0;position:relative;z-index:1}
+.step.act .sn{background:var(--acc-bg);border-color:var(--acc);color:var(--acc)}
+.step h4{font-size:.86rem;font-weight:600;color:var(--ink);margin-bottom:3px}
+.step p{font-size:.74rem;color:var(--ink3);line-height:1.5}
+/* concept plan panel */
+.cpp{background:var(--paper);border:1px solid var(--p3);border-radius:11px;overflow:hidden;box-shadow:var(--shadow)}
+.cpp-hd{padding:9px 14px;background:var(--p2);border-bottom:1px solid var(--p3);display:flex;align-items:center;gap:8px}
+.cpp-dots{display:flex;gap:4px}
+.cpp-dot{width:8px;height:8px;border-radius:50%}
+.cpp-ttl{font-family:'DM Mono',monospace;font-size:.65rem;color:var(--ink4);letter-spacing:.05em}
+.cpp-rows{padding:10px 12px;display:flex;flex-direction:column;gap:7px}
+.cpp-row{display:flex;justify-content:space-between;align-items:center;padding:8px 11px;background:var(--p2);border-radius:6px;border:1px solid var(--p3)}
+.cpp-c{font-size:.72rem;color:var(--ink2);font-family:'DM Mono',monospace}
+.cpp-b{font-size:.65rem;font-weight:700;background:var(--acc-bg);color:var(--acc);border-radius:20px;padding:2px 8px;border:1px solid var(--acc-bd)}
+.cpp-ft{margin:0 12px 10px;padding:9px 11px;background:var(--amr-bg);border:1px solid var(--amr-bd);border-radius:6px;font-size:.7rem;color:var(--amr);display:flex;align-items:center;gap:6px}
+
+/* ══════════════════════════════════
+   SLIDE 6 · 6-STAGE PIPELINE
+══════════════════════════════════ */
+#s6{padding:40px 60px;justify-content:center}
+#s6 h2{font-family:'Fraunces',serif;font-size:1.75rem;font-weight:600;letter-spacing:-.02em;color:var(--ink);margin:7px 0 4px}
+#s6 .sub{font-size:.82rem;color:var(--ink3);margin-bottom:4px}
+#s6 .sts{display:grid;grid-template-columns:repeat(6,1fr);gap:9px;margin-top:20px;position:relative}
+#s6 .sts::before{content:'';position:absolute;top:28px;left:28px;right:28px;height:1px;background:linear-gradient(to right,var(--acc-bd),var(--sage-bd));z-index:0}
+.st{background:var(--paper);border:1px solid var(--p3);border-radius:var(--r);padding:16px 12px 14px;display:flex;flex-direction:column;gap:7px;position:relative;z-index:1}
+.st::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;border-radius:var(--r) var(--r) 0 0}
+.st.ai::before{background:var(--sky)}
+.st.vf::before{background:var(--rose)}
+.st.pa::before{background:var(--acc)}
+.st-n{width:26px;height:26px;border-radius:50%;background:var(--p2);border:1px solid var(--p3);display:flex;align-items:center;justify-content:center;font-family:'DM Mono',monospace;font-size:.6rem;font-weight:500;color:var(--ink3)}
+.st h4{font-size:.76rem;font-weight:600;color:var(--ink);line-height:1.2}
+.st p{font-size:.67rem;color:var(--ink3);line-height:1.4;flex:1}
+#s6 .bot{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px}
+.sb{padding:14px 18px;border-radius:var(--r);border:1px solid;font-size:.77rem;line-height:1.55}
+.sb strong{font-weight:600}
+.sb.g{background:var(--sage-bg);border-color:var(--sage-bd);color:var(--sage)}
+.sb.b{background:var(--acc-bg);border-color:var(--acc-bd);color:var(--acc)}
+
+/* ══════════════════════════════════
+   SLIDE 7 · QUALITY GATES
+══════════════════════════════════ */
+#s7{padding:40px 60px;justify-content:center}
+#s7 h2{font-family:'Fraunces',serif;font-size:1.75rem;font-weight:600;letter-spacing:-.02em;color:var(--ink);margin:8px 0}
+#s7 .fl{display:grid;grid-template-columns:1fr auto 1fr auto 1fr auto 0.78fr;align-items:stretch;gap:0;margin-top:22px}
+.gt{background:var(--p2);border:1px solid var(--p3);border-radius:var(--r);padding:20px 17px;display:flex;flex-direction:column;gap:9px}
+.gt-lb{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;font-weight:600}
+.gt h3{font-size:.84rem;font-weight:700;color:var(--ink)}
+.gt ul{list-style:none;display:flex;flex-direction:column;gap:5px}
+.gt li{display:flex;gap:6px;align-items:flex-start;font-size:.7rem;color:var(--ink3);line-height:1.3}
+.gt li::before{content:'›';font-weight:700;flex-shrink:0}
+.gt .oc{margin-top:auto;padding:6px 10px;border-radius:6px;font-size:.67rem;font-weight:500;line-height:1.3}
+.g-ar{display:flex;align-items:center;justify-content:center;padding:0 8px;color:var(--ink4);font-size:1.2rem}
+.gt.g1{border-top:3px solid var(--amr)}
+.gt.g2{border-top:3px solid var(--sky)}
+.gt.g3{border-top:3px solid var(--acc)}
+.gt.g4{border-top:3px solid var(--sage)}
+.gt.g1 .gt-lb{color:var(--amr)}
+.gt.g2 .gt-lb{color:var(--sky)}
+.gt.g3 .gt-lb{color:var(--acc)}
+.gt.g4 .gt-lb{color:var(--sage)}
+#s7 .sjs{margin-top:16px;background:var(--p2);border:1px solid var(--p3);border-radius:var(--r);padding:12px 16px;display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.sj{padding:3px 10px;border-radius:20px;font-size:.66rem;font-weight:500;background:var(--paper);border:1px solid var(--p3);color:var(--ink2)}
+
+/* ══════════════════════════════════
+   SLIDE 8 · ADMIN PORTAL
+══════════════════════════════════ */
+#s8{padding:40px 60px;justify-content:center}
+#s8 h2{font-family:'Fraunces',serif;font-size:1.75rem;font-weight:600;letter-spacing:-.02em;color:var(--ink);margin:8px 0}
+#s8 .g{display:grid;grid-template-columns:1fr 0.95fr;gap:24px;margin-top:20px;align-items:start}
+#s8 .ss-wrap{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:auto auto;gap:10px}
+#s8 .ss-wrap .ss-frame.big{grid-column:1/-1;height:200px}
+#s8 .ss-wrap .ss-frame.sm{height:148px}
+#s8 .cls{display:flex;flex-direction:column;gap:12px}
+.cl{padding:16px 18px;border-radius:var(--r);border:1px solid;display:flex;gap:12px;align-items:flex-start}
+.cl h4{font-size:.83rem;font-weight:600;margin-bottom:3px}
+.cl p{font-size:.73rem;line-height:1.5}
+.cl.ca{background:var(--acc-bg);border-color:var(--acc-bd);color:var(--acc)}
+.cl.cs{background:var(--sage-bg);border-color:var(--sage-bd);color:var(--sage)}
+.cl.cam{background:var(--amr-bg);border-color:var(--amr-bd);color:var(--amr)}
+
+/* ══════════════════════════════════
+   SLIDE 9 · STUDENT PORTAL
+══════════════════════════════════ */
+#s9{padding:40px 60px;justify-content:center}
+#s9 h2{font-family:'Fraunces',serif;font-size:1.75rem;font-weight:600;letter-spacing:-.02em;color:var(--ink);margin:8px 0}
+#s9 .g{display:grid;grid-template-columns:1.1fr 0.9fr;gap:24px;margin-top:20px;align-items:start}
+#s9 .ss-wrap{display:flex;flex-direction:column;gap:10px}
+#s9 .ss-wrap .ss-frame.t{height:192px}
+#s9 .ss-wrap .ss-frame.b{height:178px}
+
+/* ══════════════════════════════════
+   SLIDE 10 · PHASES 1 & 2
+══════════════════════════════════ */
+#s10{padding:44px 64px;justify-content:center}
+#s10 h2{font-family:'Fraunces',serif;font-size:1.8rem;font-weight:600;letter-spacing:-.02em;color:var(--ink);margin:8px 0}
+#s10 .th{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px;margin-top:26px}
+.pcard{border-radius:13px;padding:26px 22px;border:1px solid;display:flex;flex-direction:column;gap:11px;position:relative;overflow:hidden}
+.pcard::after{content:attr(data-n);position:absolute;right:-10px;bottom:-18px;font-family:'Fraunces',serif;font-size:6.5rem;font-weight:700;line-height:1;opacity:.065;pointer-events:none}
+.pcard.p1{background:var(--amr-bg);border-color:var(--amr-bd)}
+.pcard.p2{background:var(--acc-bg);border-color:var(--acc-bd)}
+.pcard.p3{background:var(--sage-bg);border-color:var(--sage-bd)}
+.pcard .pey{font-family:'DM Mono',monospace;font-size:.6rem;font-weight:600;letter-spacing:.12em;text-transform:uppercase}
+.pcard.p1 .pey{color:var(--amr);opacity:.8}
+.pcard.p2 .pey{color:var(--acc);opacity:.8}
+.pcard.p3 .pey{color:var(--sage);opacity:.8}
+.pcard h3{font-size:.9rem;font-weight:700}
+.pcard.p1 h3{color:var(--amr)}
+.pcard.p2 h3{color:var(--acc)}
+.pcard.p3 h3{color:var(--sage)}
+.pcard ul{list-style:none;display:flex;flex-direction:column;gap:6px}
+.pcard li{display:flex;gap:7px;font-size:.74rem;color:var(--ink2);line-height:1.4}
+.pcard li::before{content:'›';font-weight:700;flex-shrink:0}
+.pcard.p1 li::before{color:var(--amr)}
+.pcard.p2 li::before{color:var(--acc)}
+.pcard.p3 li::before{color:var(--sage)}
+.pcard .res{margin-top:auto;padding:7px 11px;border-radius:7px;font-size:.7rem;font-weight:600}
+.pcard.p1 .res{background:rgba(138,74,14,.08);color:var(--amr)}
+.pcard.p2 .res{background:rgba(61,53,184,.08);color:var(--acc)}
+.pcard.p3 .res{background:rgba(61,107,94,.08);color:var(--sage)}
+#s10 .in{margin-top:16px;padding:13px 18px;background:var(--sage-bg);border:1px solid var(--sage-bd);border-radius:var(--r);display:flex;gap:11px;align-items:center;font-size:.8rem;color:var(--sage);font-weight:500}
+
+/* ══════════════════════════════════
+   SLIDE 11 · AUTO TOP-UP
+══════════════════════════════════ */
+#s11{padding:40px 60px;justify-content:center}
+#s11 h2{font-family:'Fraunces',serif;font-size:1.8rem;font-weight:600;letter-spacing:-.02em;color:var(--ink);margin:8px 0}
+#s11 .lay{display:grid;grid-template-columns:1.2fr .8fr;gap:24px;margin-top:22px}
+.lc{background:var(--p2);border:1px solid var(--p3);border-radius:13px;overflow:hidden}
+.lr{display:flex;gap:14px;align-items:flex-start;padding:16px 20px;border-bottom:1px solid var(--p3)}
+.lr:last-child{border-bottom:none}
+.li{width:32px;height:32px;border-radius:7px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.lr h4{font-size:.82rem;font-weight:600;color:var(--ink);margin-bottom:3px}
+.lr p{font-size:.7rem;color:var(--ink3);line-height:1.4}
+#s11 .sm{display:flex;flex-direction:column;gap:12px}
+.sc{background:var(--p2);border:1px solid var(--p3);border-radius:var(--r);padding:16px 18px}
+.sc h4{font-size:.84rem;font-weight:600;color:var(--ink);margin-bottom:5px}
+.sc p{font-size:.73rem;color:var(--ink3);line-height:1.5}
+.sc strong{color:var(--acc)}
+
+/* ══════════════════════════════════
+   SLIDE 12 · SUMMARY
+══════════════════════════════════ */
+#s12{flex-direction:row;overflow:hidden}
+#s12 .l{flex:0 0 480px;background:var(--ink);display:flex;flex-direction:column;justify-content:center;padding:68px 56px;position:relative;overflow:hidden}
+#s12 .l::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(-45deg,transparent,transparent 26px,rgba(255,255,255,.014) 26px,rgba(255,255,255,.014) 28px)}
+#s12 .l h2{font-family:'Fraunces',serif;font-size:2.4rem;font-weight:600;line-height:1.15;letter-spacing:-.02em;color:white;position:relative;z-index:1;margin:10px 0 18px}
+#s12 .l h2 em{color:#a5b4fc;font-style:italic}
+#s12 .l p{font-size:.86rem;line-height:1.7;color:rgba(255,255,255,.5);position:relative;z-index:1;max-width:340px}
+#s12 .l .ey{color:#a5b4fc;position:relative;z-index:1}
+#s12 .l .fl{position:relative;z-index:1;margin-top:28px;font-family:'DM Mono',monospace;font-size:.66rem;color:rgba(255,255,255,.3);letter-spacing:.06em;display:flex;flex-wrap:wrap;gap:5px;align-items:center;line-height:1.8}
+#s12 .l .fl .hi{color:#a5b4fc}
+#s12 .r{flex:1;padding:48px 48px;display:flex;flex-direction:column;justify-content:center;gap:12px}
+.sr{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.sc2{background:var(--p2);border:1px solid var(--p3);border-radius:12px;padding:20px 18px}
+.sn2{font-family:'Fraunces',serif;font-size:2.4rem;font-weight:700;line-height:1;letter-spacing:-.04em;color:var(--acc);margin-bottom:5px}
+.sl{font-size:.76rem;color:var(--ink3);line-height:1.4}
+#s12 .bm{padding:14px 18px;background:var(--acc-bg);border:1px solid var(--acc-bd);border-radius:var(--r);font-size:.82rem;color:var(--acc);font-weight:500;line-height:1.55;display:flex;gap:11px;align-items:center}
+/* ── COLOUR UNIFICATION ── single accent (--acc) throughout */
+.pc.r1::before,.pc.r2::before,.pc.r3::before{background:var(--acc)!important}
+.pc.r1 .pn,.pc.r2 .pn,.pc.r3 .pn{color:var(--acc)!important}
+.b1,.b2,.b3{background:var(--acc)!important}
+.t-ai{background:var(--acc-bg)!important;color:var(--acc)!important;border-color:var(--acc-bd)!important}
+.t-adm{background:var(--p2)!important;color:var(--ink3)!important;border-color:var(--p3)!important}
+.t-auto{background:var(--p2)!important;color:var(--ink3)!important;border-color:var(--p3)!important}
+.wa{background:rgba(255,255,255,.18)!important;color:rgba(255,255,255,.9)!important;border-color:rgba(255,255,255,.3)!important}
+.wai,.wau{background:var(--p2)!important;color:var(--ink3)!important;border-color:var(--p3)!important}
+</style>
+</head>
+<body>
+<span id="kbh">← → · Space</span>
+<button id="fsb" title="Fullscreen">
+ <svg id="fs-enter" width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2 2h4M2 2v4M13 2h-4M13 2v4M2 13h4M2 13v-4M13 13h-4M13 13v-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+ <svg id="fs-exit" width="15" height="15" viewBox="0 0 15 15" fill="none" xmlns="http://www.w3.org/2000/svg" style="display:none"><path d="M6 2v4H2M9 2v4h4M6 13v-4H2M9 13v-4h4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+</button>
+<div id="deck"><div class="vp">
+
+<!-- ══ S1 · TITLE ══════════════════════════════════ -->
+<div class="slide on" id="s1">
+ <div class="l">
+  <p class="ey a1">NxtWave · Learning Pod</p>
+  <h1 class="a2">GRIT<br/><em>Practice</em><br/>Agentic Flow.</h1>
+  <p class="sub a3">How one agentic workflow generates, validates, and continuously improves practice questions across all 8 curriculum tracks — without humans writing each one.</p>
+ </div>
+ <div class="r">
+  <div class="bg-g">G</div>
+  <div class="r-inner a5">
+   <div style="display:flex;flex-direction:column;gap:9px;margin-top:10px">
+    <div style="background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);border-radius:10px;padding:14px 16px">
+     <div style="font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:4px">Stage 1</div>
+     <div style="font-size:.88rem;font-weight:600;color:#fff;margin-bottom:2px">Intelligent Generation</div>
+     <div style="font-size:.7rem;color:rgba(255,255,255,.6);line-height:1.45">Skill-specific prompts → question + answer + distractors + explanation</div>
+    </div>
+    <div style="text-align:center;color:rgba(255,255,255,.28);font-size:.75rem;line-height:1">↓</div>
+    <div style="background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);border-radius:10px;padding:14px 16px">
+     <div style="font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:4px">Stage 2</div>
+     <div style="font-size:.88rem;font-weight:600;color:#fff;margin-bottom:2px">Multi-Step Validation</div>
+     <div style="font-size:.7rem;color:rgba(255,255,255,.6);line-height:1.45">Automated QC with reasoning — every pass or fail is explained</div>
+    </div>
+    <div style="text-align:center;color:rgba(255,255,255,.28);font-size:.75rem;line-height:1">↓</div>
+    <div style="background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);border-radius:10px;padding:14px 16px">
+     <div style="font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.45);margin-bottom:4px">Stage 3</div>
+     <div style="font-size:.88rem;font-weight:600;color:#fff;margin-bottom:2px">Memory &amp; Improvement Loop</div>
+     <div style="font-size:.7rem;color:rgba(255,255,255,.6);line-height:1.45">Rejected questions feed back in — system compounds improvement over time</div>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+
+<!-- ══ S2 · PROBLEM ══════════════════════════════════ -->
+<div class="slide" id="s2">
+ <p class="ey a1">The Problem</p>
+ <h2 class="a2">Creating practice content at scale<br/>was a bottleneck.</h2>
+ <div class="g a3">
+  <div class="pc r1">
+   <div class="pn">8</div>
+   <h3>Curriculum Tracks</h3>
+   <p>FullStack, GenAI, Aptitude, English, DS&amp;Algo, DS-ML, Robotics, Assessment — each needing its own distinct question bank.</p>
+  </div>
+  <div class="pc r2">
+   <div class="pn" style="font-size:2.2rem;letter-spacing:-.02em">Manual</div>
+   <h3>Time-intensive creation</h3>
+   <p>Each question requires expert writing, distractor crafting, and full verification — a slow process that doesn't scale across 8 tracks.</p>
+  </div>
+  <div class="pc r3">
+   <div class="pn">∞</div>
+   <h3>Questions needed</h3>
+   <p>Fresh content is needed continuously — students exhaust banks fast and disengage the moment they see repeated questions.</p>
+  </div>
+ </div>
+</div>
+
+<!-- ══ S3 · WHAT "AGENTIC" MEANS ══════════════════════════════════ -->
+<div class="slide" id="s3">
+ <div class="l">
+  <p class="ey a1">Key Concept</p>
+  <h2 class="a2">What does<br/><em>"Agentic"</em><br/>mean here?</h2>
+  <p class="def a3">A regular AI tool waits for you to give it a task and returns a result. An agentic flow is fundamentally different — it runs a loop on its own.</p>
+  <div class="a4" style="margin-top:22px;padding:15px 18px;background:var(--p2);border:1px solid var(--p3);border-radius:var(--r);font-size:.78rem;line-height:1.65;color:var(--ink2)">
+   <strong style="color:var(--ink)">The factory line analogy:</strong> Think of it as a factory line with built-in QC — not a single machine. It generates, evaluates its own output, fixes problems, and only surfaces the final verified result.
+  </div>
+ </div>
+ <div class="r">
+  <div class="prop a5">
+   <div class="pi" style="background:var(--p3)">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="3" width="10" height="10" rx="2" stroke="var(--ink3)" stroke-width="1.5"/></svg>
+   </div>
+   <div>
+    <h4>Regular AI Tool</h4>
+    <p>You prompt → it responds → done. Each task is independent. No memory. No self-correction. You review every output manually.</p>
+   </div>
+  </div>
+  <div class="prop a6" style="border:1.5px solid var(--acc-bd);background:var(--acc-bg)">
+   <div class="pi" style="background:var(--acc-bg)">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5" stroke="var(--acc)" stroke-width="1.5"/><path d="M8 5.5v2.5l1.5 1.5" stroke="var(--acc)" stroke-width="1.5" stroke-linecap="round"/></svg>
+   </div>
+   <div>
+    <h4 style="color:var(--acc)">Agentic Flow</h4>
+    <p>Runs a continuous loop — generates → validates → fixes → improves. Self-correcting. Memory-backed. Only final output surfaces.</p>
+   </div>
+  </div>
+  <div class="prop a7">
+   <div class="pi" style="background:var(--p2)">
+    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="var(--ink3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+   </div>
+   <div>
+    <h4>The shift in human effort</h4>
+    <p>From reviewing every output → to setting the rules once and trusting the loop to enforce them at scale, continuously.</p>
+   </div>
+  </div>
+ </div>
+</div>
+
+<!-- ══ S4 · 3-STAGE OVERVIEW ══════════════════════════════════ -->
+<div class="slide" id="s4">
+ <p class="ey a1">The Big Picture</p>
+ <h2 class="a2">Three stages. One continuous loop.</h2>
+ <div class="phs a3" style="grid-template-columns:1fr 1fr 1fr;margin-top:28px">
+  <div class="ph hl" style="padding:36px 28px;gap:12px">
+   <div class="ph-bar b1"></div>
+   <div class="ph-n">Stage 1</div>
+   <h3 style="font-size:1.3rem">Intelligent Generation</h3>
+   <p>Skill-specific prompts → question, answer, distractors, explanation.</p>
+  </div>
+  <div class="ph" style="padding:36px 28px;gap:12px">
+   <div class="ph-bar b2"></div>
+   <div class="ph-n">Stage 2</div>
+   <h3 style="font-size:1.3rem">Multi-Step Validation</h3>
+   <p>Automated QC with reasoning — every decision explained, no human per item.</p>
+  </div>
+  <div class="ph" style="padding:36px 28px;gap:12px">
+   <div class="ph-bar b3"></div>
+   <div class="ph-n">Stage 3</div>
+   <h3 style="font-size:1.3rem">Memory &amp; Improvement</h3>
+   <p>Failures are stored. The system learns and gets better with every run.</p>
+  </div>
+ </div>
+</div>
+
+<!-- ══ S5 · STAGE 1: INTELLIGENT GENERATION ══════════════════════════════════ -->
+<div class="slide" id="s5">
+ <p class="ey a1">Stage 1 · Deep Dive</p>
+ <h2 class="a2">Intelligent Generation</h2>
+ <div class="g a3">
+  <div class="steps">
+   <div class="step act">
+    <div class="sn">1</div>
+    <div>
+     <h4>Read the curriculum skill</h4>
+     <p>The agent ingests the specific learning objective from the syllabus — not a broad topic, but the exact skill to be tested.</p>
+    </div>
+   </div>
+   <div class="step act">
+    <div class="sn">2</div>
+    <div>
+     <h4>Auto-generate a skill-specific prompt</h4>
+     <p>No one-size-fits-all template. Each skill gets its own prompt, tuned to that concept. "Binary search termination" gets a different prompt than "React useEffect lifecycle."</p>
+    </div>
+   </div>
+   <div class="step act">
+    <div class="sn">3</div>
+    <div>
+     <h4>Generate the full question package</h4>
+     <p>Output per item includes: question text, correct answer, three distractors, and a full explanation — mapped to common misconceptions.</p>
+    </div>
+   </div>
+   <div class="step act">
+    <div class="sn">4</div>
+    <div>
+     <h4>Ensure concept coverage</h4>
+     <p>Tracks topic distribution across the batch — no concept is over-represented or skipped. Every area of the syllabus gets appropriate coverage.</p>
+    </div>
+   </div>
+  </div>
+  <div class="cpp asc">
+   <div class="cpp-hd">
+    <div class="cpp-dots">
+     <div class="cpp-dot" style="background:#f87171"></div>
+     <div class="cpp-dot" style="background:#fbbf24"></div>
+     <div class="cpp-dot" style="background:#34d399"></div>
+    </div>
+    <div class="cpp-ttl">Output per question</div>
+   </div>
+   <div class="cpp-rows">
+    <div class="cpp-row">
+     <span class="cpp-c">question_text</span>
+     <span class="tag t-ai">AI Generated</span>
+    </div>
+    <div class="cpp-row">
+     <span class="cpp-c">correct_answer</span>
+     <span class="tag t-auto">Auto-verified</span>
+    </div>
+    <div class="cpp-row">
+     <span class="cpp-c">distractor_A / B / C</span>
+     <span class="tag t-ai">Misconception-mapped</span>
+    </div>
+    <div class="cpp-row">
+     <span class="cpp-c">explanation</span>
+     <span class="tag t-auto">Pedagogical</span>
+    </div>
+    <div class="cpp-row">
+     <span class="cpp-c">skill_tag</span>
+     <span class="tag t-acc">Syllabus-aligned</span>
+    </div>
+    <div class="cpp-row">
+     <span class="cpp-c">difficulty_level</span>
+     <span class="tag t-adm">Calibrated</span>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+
+<!-- ══ S6 · STAGE 2: VALIDATION ENGINE ══════════════════════════════════ -->
+<div class="slide" id="s6" style="padding:44px 64px;justify-content:center">
+ <p class="ey a1">Stage 2 · Deep Dive</p>
+ <h2 class="a2" style="font-family:'Fraunces',serif;font-size:1.75rem;font-weight:600;letter-spacing:-.02em;color:var(--ink);margin:8px 0">Multi-Step Validation Engine</h2>
+ <div style="display:grid;grid-template-columns:1fr 1.1fr;gap:32px;margin-top:22px" class="a3">
+  <div class="steps">
+   <div class="step act">
+    <div class="sn">1</div>
+    <div>
+     <h4>Every question enters the queue</h4>
+     <p>No question skips QC. Every generated item must pass through the validation engine before it reaches a student.</p>
+    </div>
+   </div>
+   <div class="step act">
+    <div class="sn">2</div>
+    <div>
+     <h4>Automated checks with reasoning</h4>
+     <p>Not just pass/fail — the agent produces a written reason for every decision. If something fails, you know exactly why.</p>
+    </div>
+   </div>
+   <div class="step act">
+    <div class="sn">3</div>
+    <div>
+     <h4>Multi-angle evaluation</h4>
+     <p>Questions are evaluated from multiple independent dimensions simultaneously — not one generic quality score.</p>
+    </div>
+   </div>
+   <div class="step act">
+    <div class="sn">4</div>
+    <div>
+     <h4>No human review per item</h4>
+     <p>The system decides what's good enough. Human effort is reserved for audits and edge cases — not reviewing each question individually.</p>
+    </div>
+   </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:14px">
+   <div class="pc r1 asc">
+    <h3>What gets validated</h3>
+    <p style="margin-top:6px;line-height:1.6">Factual correctness · Answer unambiguity · Syllabus alignment · Distractor plausibility · Explanation completeness · Difficulty calibration</p>
+   </div>
+   <div class="pc r3 asc">
+    <h3>The core "agentic" behavior</h3>
+    <p style="margin-top:6px;line-height:1.6">The system decides what passes without a human reviewing each item. Every rejection comes with a written reason — so nothing is a black box. Every decision is logged and traceable.</p>
+   </div>
+  </div>
+ </div>
+</div>
+
+<!-- ══ S7 · STAGE 3: MEMORY & IMPROVEMENT ══════════════════════════════════ -->
+<div class="slide" id="s7" style="padding:44px 64px;justify-content:center">
+ <p class="ey a1">Stage 3 · Deep Dive</p>
+ <h2 class="a2" style="font-family:'Fraunces',serif;font-size:1.75rem;font-weight:600;letter-spacing:-.02em;color:var(--ink);margin:8px 0">Memory &amp; Improvement Loop</h2>
+ <div style="display:grid;grid-template-columns:1fr 1.1fr;gap:32px;margin-top:22px" class="a3">
+  <div class="steps">
+   <div class="step act">
+    <div class="sn">1</div>
+    <div>
+     <h4>Rejected questions are stored</h4>
+     <p>Every question that fails validation is logged — not discarded. The failure reason is stored alongside the question itself.</p>
+    </div>
+   </div>
+   <div class="step act">
+    <div class="sn">2</div>
+    <div>
+     <h4>Agent learns from the failures</h4>
+     <p>Before the next generation run, the agent reviews the rejection log. It uses this context to adjust its approach and avoid the same patterns.</p>
+    </div>
+   </div>
+   <div class="step act">
+    <div class="sn">3</div>
+    <div>
+     <h4>Quality improves with each run</h4>
+     <p>First-time pass rate goes up over time. Fewer rejections mean faster pool fill. The system becomes more efficient without any additional human input.</p>
+    </div>
+   </div>
+   <div class="step act">
+    <div class="sn">4</div>
+    <div>
+     <h4>Compound improvement loop</h4>
+     <p>This is not a one-time generation — it's a continuously self-improving system. Each cycle makes the next one better.</p>
+    </div>
+   </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:14px">
+   <div class="cpp asc">
+    <div class="cpp-hd">
+     <div class="cpp-dots">
+      <div class="cpp-dot" style="background:#f87171"></div>
+      <div class="cpp-dot" style="background:#fbbf24"></div>
+      <div class="cpp-dot" style="background:#34d399"></div>
+     </div>
+     <div class="cpp-ttl">Memory log entry</div>
+    </div>
+    <div class="cpp-rows">
+     <div class="cpp-row">
+      <span class="cpp-c">question_id</span>
+      <span class="tag t-fail">Rejected</span>
+     </div>
+     <div class="cpp-row">
+      <span class="cpp-c">failure_reason</span>
+      <span class="tag t-adm">Logged</span>
+     </div>
+     <div class="cpp-row">
+      <span class="cpp-c">skill_tag</span>
+      <span class="tag t-acc">Tracked</span>
+     </div>
+     <div class="cpp-row">
+      <span class="cpp-c">pattern_flag</span>
+      <span class="tag t-ai">Learned</span>
+     </div>
+    </div>
+   </div>
+   <div style="padding:16px 18px;background:var(--p2);border:1px solid var(--p3);border-radius:var(--r);font-size:.8rem;line-height:1.6;color:var(--ink2)">
+    <strong style="display:block;margin-bottom:4px;color:var(--ink)">Why this matters</strong>
+    The system doesn't just get told what's wrong — it actively incorporates that feedback into future behaviour. Over time, rejection rates fall and first-pass quality rises automatically.
+   </div>
+  </div>
+ </div>
+</div>
+
+<!-- ══ S8 · SAMPLE OUTPUT ══════════════════════════════════ -->
+<div class="slide" id="s8" style="padding:48px 64px;justify-content:center">
+ <p class="ey a1">What It Produces</p>
+ <h2 class="a2" style="font-family:'Fraunces',serif;font-size:1.85rem;font-weight:600;letter-spacing:-.02em;color:var(--ink);margin:8px 0 20px">A sample generated question</h2>
+ <div style="display:grid;grid-template-columns:1.1fr 1fr;gap:24px" class="a3">
+  <div class="cpp asc">
+   <div class="cpp-hd" style="padding:12px 16px">
+    <div style="display:flex;justify-content:space-between;align-items:center;width:100%">
+     <div style="display:flex;gap:8px;align-items:center">
+      <span class="tag t-ai">FullStack</span>
+      <span class="tag t-acc">React Hooks</span>
+     </div>
+     <span class="tag t-auto">Auto-Verified ✓</span>
+    </div>
+   </div>
+   <div style="padding:18px 18px 6px">
+    <p style="font-size:.86rem;font-weight:500;color:var(--ink);line-height:1.55;margin-bottom:14px">What happens when you call <code style="background:var(--p2);padding:1px 5px;border-radius:4px;font-family:'DM Mono',monospace;font-size:.82rem">useState</code> inside a conditional block in a React component?</p>
+    <div style="display:flex;flex-direction:column;gap:7px">
+     <div style="padding:8px 12px;border-radius:6px;border:1px solid var(--p3);background:var(--paper);font-size:.78rem;color:var(--ink3);display:flex;gap:10px;align-items:flex-start">
+      <span style="font-family:'DM Mono',monospace;font-size:.7rem;color:var(--ink4);flex-shrink:0">A</span>
+      <span>React will silently ignore the hook call and skip rendering.</span>
+     </div>
+     <div style="padding:8px 12px;border-radius:6px;border:1px solid var(--sage-bd);background:var(--sage-bg);font-size:.78rem;color:var(--sage);display:flex;gap:10px;align-items:flex-start">
+      <span style="font-family:'DM Mono',monospace;font-size:.7rem;color:var(--sage);flex-shrink:0;font-weight:600">B ✓</span>
+      <span>It violates the Rules of Hooks and will throw an error because hook call order must be consistent across renders.</span>
+     </div>
+     <div style="padding:8px 12px;border-radius:6px;border:1px solid var(--p3);background:var(--paper);font-size:.78rem;color:var(--ink3);display:flex;gap:10px;align-items:flex-start">
+      <span style="font-family:'DM Mono',monospace;font-size:.7rem;color:var(--ink4);flex-shrink:0">C</span>
+      <span>The state will be created only once when the condition is first true.</span>
+     </div>
+     <div style="padding:8px 12px;border-radius:6px;border:1px solid var(--p3);background:var(--paper);font-size:.78rem;color:var(--ink3);display:flex;gap:10px;align-items:flex-start">
+      <span style="font-family:'DM Mono',monospace;font-size:.7rem;color:var(--ink4);flex-shrink:0">D</span>
+      <span>The component will re-render twice to reconcile the conditional hook.</span>
+     </div>
+    </div>
+   </div>
+   <div style="padding:12px 18px 16px;border-top:1px solid var(--p3);margin-top:10px">
+    <p style="font-size:.7rem;font-family:'DM Mono',monospace;color:var(--ink4);letter-spacing:.06em;text-transform:uppercase;margin-bottom:4px">Explanation</p>
+    <p style="font-size:.76rem;color:var(--ink3);line-height:1.55">React tracks hooks by call order on every render. Placing a hook inside an <code style="background:var(--p2);padding:1px 4px;border-radius:3px;font-family:'DM Mono',monospace;font-size:.74rem">if</code> block means the order can differ between renders, breaking React's internal state mapping and causing an error.</p>
+   </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:14px">
+   <div class="prop asc">
+    <div class="pi" style="background:var(--acc-bg)">
+     <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M3 8l3 3 7-7" stroke="var(--acc)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+    <div>
+     <h4>Fully generated by AI</h4>
+     <p>Question, correct answer, distractors, and explanation — all produced by the generation stage, tailored to the React Hooks skill.</p>
+    </div>
+   </div>
+   <div class="prop asc">
+    <div class="pi" style="background:var(--acc-bg)">
+     <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="var(--acc)" stroke-width="1.5"/><path d="M8 5v3l2 2" stroke="var(--acc)" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </div>
+    <div>
+     <h4>Each distractor is intentional</h4>
+     <p>Options A, C, D map to specific misconceptions students commonly hold — not random wrong answers.</p>
+    </div>
+   </div>
+   <div class="prop asc">
+    <div class="pi" style="background:var(--p2)">
+     <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="3" y="4" width="10" height="8" rx="1.5" stroke="var(--ink3)" stroke-width="1.5"/><path d="M6 4V3.5a2 2 0 0 1 4 0V4" stroke="var(--ink3)" stroke-width="1.5"/></svg>
+    </div>
+    <div>
+     <h4>Auto-verified before use</h4>
+     <p>This question has passed the full validation engine — correctness, clarity, alignment, and distractor quality all checked.</p>
+    </div>
+   </div>
+  </div>
+ </div>
+</div>
+
+<!-- ══ S9 · WHAT HUMANS STILL DO ══════════════════════════════════ -->
+<div class="slide" id="s9" style="padding:52px 68px;justify-content:center">
+ <p class="ey a1">Human Role</p>
+ <h2 class="a2" style="font-family:'Fraunces',serif;font-size:2rem;font-weight:600;letter-spacing:-.02em;color:var(--ink);margin:8px 0 28px;line-height:1.2">Humans are not out of the loop.<br/>Their role just changed.</h2>
+ <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px" class="a3">
+  <div class="prop" style="flex-direction:column;gap:12px">
+   <div style="display:flex;gap:12px;align-items:flex-start">
+    <div class="pi" style="background:var(--p2)">
+     <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M4 6h8M4 10h5" stroke="var(--ink3)" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </div>
+    <div>
+     <h4>Audit Sample</h4>
+     <p>Content leads review a sample — not every question. Spot-check for edge cases and quality drift, not full approval workflows.</p>
+    </div>
+   </div>
+  </div>
+  <div class="prop" style="flex-direction:column;gap:12px">
+   <div style="display:flex;gap:12px;align-items:flex-start">
+    <div class="pi" style="background:var(--acc-bg)">
+     <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v2M8 11v2M3 8h2M11 8h2" stroke="var(--acc)" stroke-width="1.5" stroke-linecap="round"/><circle cx="8" cy="8" r="2.5" stroke="var(--acc)" stroke-width="1.5"/></svg>
+    </div>
+    <div>
+     <h4>Test Edge Cases</h4>
+     <p>Run test-case scenarios to validate that the system handles unusual or complex concepts correctly. Humans define the edge, the system handles the volume.</p>
+    </div>
+   </div>
+  </div>
+  <div class="prop" style="flex-direction:column;gap:12px;border:1.5px solid var(--acc-bd);background:var(--acc-bg)">
+   <div style="display:flex;gap:12px;align-items:flex-start">
+    <div class="pi" style="background:var(--acc-bg)">
+     <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5.5" stroke="var(--acc)" stroke-width="1.5"/><path d="M8 6v2.5M8 10.5v.5" stroke="var(--acc)" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </div>
+    <div>
+     <h4 style="color:var(--acc)">The L4 Label</h4>
+     <p style="color:var(--ink2)"><strong>AI picks within bounds, humans handle exceptions.</strong> L4 means the system operates autonomously within defined quality thresholds — humans step in only when those thresholds are crossed.</p>
+    </div>
+   </div>
+  </div>
+ </div>
+ <div class="bs a4" style="margin-top:20px">
+  <span>→</span>
+  <span>Human effort shifts from <strong>generation to verification</strong>. The cognitive work moves up the stack — from writing questions to defining quality standards.</span>
+ </div>
+</div>
+
+<!-- ══ S10 · SCALE IMPACT + METRICS ══════════════════════════════════ -->
+<div class="slide" id="s10" style="padding:48px 64px;justify-content:center">
+ <p class="ey a1">Impact</p>
+ <h2 class="a2" style="font-family:'Fraunces',serif;font-size:1.85rem;font-weight:600;letter-spacing:-.02em;color:var(--ink);margin:8px 0 20px">One workflow. Eight tracks. Continuously improving.</h2>
+ <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:0;border:1px solid var(--p3);border-radius:12px;overflow:hidden;margin-bottom:18px" class="a3">
+  <div class="ph">
+   <div class="ph-bar b1"></div>
+   <div class="ph-n">Scale</div>
+   <h3 style="font-family:'Fraunces',serif;font-size:1.1rem">All 8 Tracks Served</h3>
+   <p>One agentic workflow generates content for every curriculum track — FullStack, GenAI, Aptitude, English, DS&amp;Algo, DS-ML, Robotics, Assessment.</p>
+  </div>
+  <div class="ph" style="border-right:1px solid var(--p3)">
+   <div class="ph-bar b2"></div>
+   <div class="ph-n">Speed</div>
+   <h3 style="font-family:'Fraunces',serif;font-size:1.1rem">Content Ships Faster</h3>
+   <p>Practice content that previously required days of expert time is now generated in batches — continuously, without scheduling bottlenecks.</p>
+  </div>
+  <div class="ph">
+   <div class="ph-bar b3"></div>
+   <div class="ph-n">Focus</div>
+   <h3 style="font-family:'Fraunces',serif;font-size:1.1rem">Humans Do Higher Work</h3>
+   <p>Content leads move from writing questions to defining quality standards, reviewing strategy, and managing edge cases at the system level.</p>
+  </div>
+ </div>
+ <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px" class="a4">
+  <div style="padding:16px 18px;background:var(--p2);border:1px solid var(--p3);border-radius:var(--r)">
+   <div style="font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--acc);margin-bottom:4px">Metric · Efficiency</div>
+   <div style="font-size:.84rem;font-weight:500;color:var(--ink);line-height:1.5">How fast does content ship? Track time from syllabus input to live questions in the student pool.</div>
+  </div>
+  <div style="padding:16px 18px;background:var(--p2);border:1px solid var(--p3);border-radius:var(--r)">
+   <div style="font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--acc);margin-bottom:4px">Metric · Delta</div>
+   <div style="font-size:.84rem;font-weight:500;color:var(--ink);line-height:1.5">Is quality improving over time? Track first-pass validation rate across runs — higher delta means the loop is working.</div>
+  </div>
+  <div style="padding:16px 18px;background:var(--p2);border:1px solid var(--p3);border-radius:var(--r)">
+   <div style="font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--acc);margin-bottom:4px">Metric · Engagement</div>
+   <div style="font-size:.84rem;font-weight:500;color:var(--ink);line-height:1.5">Are students actually using the practice content? Tracks attempt rates and whether students return for additional sets.</div>
+  </div>
+ </div>
+</div>
+
+<!-- ══ S11 · ON RISK ══════════════════════════════════ -->
+<div class="slide" id="s11" style="padding:52px 68px;justify-content:center">
+ <p class="ey a1">On Risk</p>
+ <h2 class="a2" style="font-family:'Fraunces',serif;font-size:2rem;font-weight:600;letter-spacing:-.02em;color:var(--ink);margin:8px 0 24px;line-height:1.2">Every decision is logged.<br/>Nothing is a black box.</h2>
+ <div style="display:grid;grid-template-columns:1.1fr 1fr;gap:28px" class="a3">
+  <div class="steps">
+   <div class="step act">
+    <div class="sn">1</div>
+    <div>
+     <h4>Reasoning attached to every reject</h4>
+     <p>The validation engine doesn't just say "fail" — it writes a reason. Every rejected question has a logged explanation of what specifically didn't pass.</p>
+    </div>
+   </div>
+   <div class="step act">
+    <div class="sn">2</div>
+    <div>
+     <h4>Full traceability</h4>
+     <p>If a question slips through that shouldn't have, we can trace exactly what the evaluator checked, what it saw, and why it passed. The audit trail is complete.</p>
+    </div>
+   </div>
+   <div class="step act">
+    <div class="sn">3</div>
+    <div>
+     <h4>Fixable logic, not opaque models</h4>
+     <p>Because every decision has reasoning, we can identify patterns in failures and fix the validation logic directly — not retrain from scratch.</p>
+    </div>
+   </div>
+   <div class="step act">
+    <div class="sn">4</div>
+    <div>
+     <h4>Human audit as final safety net</h4>
+     <p>Content leads run periodic audits and edge-case testing. The automation handles volume; the human handles judgement on the boundary cases.</p>
+    </div>
+   </div>
+  </div>
+  <div style="display:flex;flex-direction:column;gap:14px">
+   <div style="padding:20px 22px;background:var(--acc-bg);border:1.5px solid var(--acc-bd);border-radius:var(--r)">
+    <div style="font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--acc);margin-bottom:8px">If something goes wrong</div>
+    <p style="font-size:.84rem;color:var(--ink2);line-height:1.6">We can trace exactly why the evaluator passed a bad question and fix the logic. It's not "retrain the AI" — it's "update the rule that was wrong."</p>
+   </div>
+   <div style="padding:20px 22px;background:var(--p2);border:1px solid var(--p3);border-radius:var(--r)">
+    <div style="font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink3);margin-bottom:8px">The result</div>
+    <p style="font-size:.84rem;color:var(--ink2);line-height:1.6">A system that fails gracefully and improves from failure. Confidence in the output comes not from trusting the AI blindly — but from the architecture of accountability built around it.</p>
+   </div>
+   <div style="padding:14px 18px;background:var(--p2);border:1px solid var(--p3);border-radius:var(--r);display:flex;gap:10px;align-items:center">
+    <span style="color:var(--ink4);font-size:1rem">🔍</span>
+    <p style="font-size:.76rem;color:var(--ink3);line-height:1.5"><strong style="color:var(--ink)">Every decision logged.</strong> Every failure reasoned. Every improvement traceable.</p>
+   </div>
+  </div>
+ </div>
+</div>
+
+
+<!-- ══ S12 · THANK YOU ══════════════════════════════════ -->
+<div class="slide" id="s12">
+ <div style="display:flex;flex-direction:column;justify-content:center;align-items:flex-start;padding:100px 120px;height:100%">
+  <p class="ey a1" style="margin-bottom:16px">NxtWave · Learning Pod</p>
+  <h1 class="a2" style="font-family:'Fraunces',serif;font-size:5rem;font-weight:700;line-height:1.05;letter-spacing:-.03em;color:var(--ink);margin:0 0 28px">Thank<br/><em style="font-style:italic;color:var(--acc)">you.</em></h1>
+  <p class="a3" style="font-size:1rem;line-height:1.8;color:var(--ink3);max-width:520px">Questions, feedback, or a deeper walkthrough — happy to discuss any part of the GRIT Practice Agentic Flow.</p>
+ </div>
+</div>
+
+</div><!-- .vp -->
+</div><!-- #deck -->
+<div id="nav">
+ <button id="bp">← Prev</button>
+ <div id="dots"></div>
+ <span id="ctr">1 / 12</span>
+ <button id="bn">Next →</button>
+</div>
+
+<script>
+const slides=document.querySelectorAll('.slide'),dots=document.getElementById('dots'),ctr=document.getElementById('ctr');
+let c=0,busy=false;
+const AS='.a1,.a2,.a3,.a4,.a5,.a6,.a7,.a8,.a9,.af1,.asc';
+
+slides.forEach((_,i)=>{const d=document.createElement('div');d.className='dot'+(i===0?' on':'');d.onclick=()=>go(i);dots.appendChild(d);});
+ctr.textContent=`1 / ${slides.length}`;
+
+// Animate first slide in
+gsap.to(slides[0],{opacity:1,duration:0.01});
+gsap.to(slides[0].querySelectorAll(AS),{opacity:1,y:0,duration:0.5,ease:'power3.out',stagger:0.07,delay:0.1});
+
+function go(n){
+  if(busy)return;
+  n=Math.max(0,Math.min(slides.length-1,n));
+  if(n===c)return;
+  busy=true;
+  const dir=n>c?1:-1;
+  const out=slides[c],ins=slides[n];
+
+  dots.children[c].classList.remove('on');
+  c=n;
+  dots.children[c].classList.add('on');
+  ctr.textContent=`${c+1} / ${slides.length}`;
+
+  // prep incoming
+  gsap.set(ins,{opacity:0,y:dir*24});
+  gsap.set(ins.querySelectorAll(AS),{opacity:0,y:10});
+  ins.classList.add('on');
+
+  // exit outgoing
+  gsap.to(out,{opacity:0,y:dir*-18,duration:0.26,ease:'power2.in',onComplete:()=>{
+    out.classList.remove('on');
+    gsap.set(out,{clearProps:'opacity,transform'});
+  }});
+
+  // enter incoming
+  gsap.to(ins,{opacity:1,y:0,duration:0.44,ease:'power3.out',delay:0.12,onComplete:()=>{busy=false;}});
+  gsap.to(ins.querySelectorAll(AS),{opacity:1,y:0,duration:0.4,ease:'power2.out',stagger:0.06,delay:0.2});
+}
+
+document.getElementById('bn').onclick=()=>{go(c+1);showNav();};
+document.getElementById('bp').onclick=()=>{go(c-1);showNav();};
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowRight'||e.key===' '){e.preventDefault();go(c+1);showNav();}
+  if(e.key==='ArrowLeft'){e.preventDefault();go(c-1);showNav();}
+});
+let tx=0;
+document.addEventListener('touchstart',e=>{tx=e.touches[0].clientX;});
+document.addEventListener('touchend',e=>{const d=tx-e.changedTouches[0].clientX;if(Math.abs(d)>50){d>0?go(c+1):go(c-1);}showNav();});
+document.addEventListener('click',showNav);
+
+// UI visibility
+const nav=document.getElementById('nav'),fsb=document.getElementById('fsb');
+let navT=null;
+function showNav(){
+  nav.classList.add('ui-on');
+  clearTimeout(navT);
+  navT=setTimeout(()=>nav.classList.remove('ui-on'),3000);
+}
+nav.addEventListener('mouseenter',()=>clearTimeout(navT));
+nav.addEventListener('mouseleave',()=>{navT=setTimeout(()=>nav.classList.remove('ui-on'),3000);});
+
+document.addEventListener('mousemove',e=>{
+  // Nav: near bottom centre
+  if(window.innerHeight-e.clientY<130&&Math.abs(e.clientX-window.innerWidth/2)<320) showNav();
+  // Fullscreen btn: near top-left corner
+  const near=e.clientX<100&&e.clientY<80;
+  fsb.classList.toggle('ui-on',near);
+});
+
+const fsEnter=document.getElementById('fs-enter'),fsExit=document.getElementById('fs-exit');
+fsb.onclick=()=>{if(!document.fullscreenElement){document.documentElement.requestFullscreen();}else{document.exitFullscreen();}};
+document.addEventListener('fullscreenchange',()=>{const fs=!!document.fullscreenElement;fsEnter.style.display=fs?'none':'block';fsExit.style.display=fs?'block':'none';});
+</script>
+</body>
