@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>GRIT Pipeline · Workflow</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,700;1,9..144,400;1,9..144,600&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap"/>
+<style>
+:root{
+  --paper:#f9f7f3;--p2:#f2ede3;--p3:#e8e0d0;--p4:#ddd5c4;
+  --ink:#1a1714;--ink2:#403b35;--ink3:#7a7068;--ink4:#b0a898;
+  --acc:#3d35b8;--acc2:#5b54d4;--acc-bg:#eeeeff;--acc-bd:#c5c2f5;
+  --ai-bg:#eeeeff;--ai-bd:#c5c2f5;--ai-c:#3d35b8;
+  --adm-bg:#fef3c7;--adm-bd:#fcd34d;--adm-c:#92400e;
+  --mch-bg:#f3f4f6;--mch-bd:#d1d5db;--mch-c:#374151;
+  --pass-bg:#ecfdf5;--pass-bd:#6ee7b7;--pass-c:#065f46;
+  --fail-bg:#fef2f2;--fail-bd:#fca5a5;--fail-c:#991b1b;
+  --warn-bg:#fffbeb;--warn-bd:#fde68a;--warn-c:#78350f;
+  --r:12px;--shadow:0 1px 3px rgba(0,0,0,.06),0 4px 14px rgba(0,0,0,.06);--shadow-lg:0 4px 28px rgba(0,0,0,.10);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{font-size:16px;scroll-behavior:smooth}
+body{font-family:'DM Sans',sans-serif;background:var(--paper);color:var(--ink);-webkit-font-smoothing:antialiased;overflow-x:hidden}
+
+/* ─── NAV ─── */
+#top-nav{
+  position:fixed;top:0;left:0;right:0;height:56px;z-index:200;
+  background:rgba(249,247,243,.88);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
+  border-bottom:1px solid var(--p3);display:flex;align-items:center;
+  justify-content:space-between;padding:0 48px;gap:24px;
+}
+.nav-logo{font-family:'Fraunces',serif;font-size:.95rem;font-weight:700;color:var(--ink);text-decoration:none;white-space:nowrap}
+.nav-logo span{color:var(--acc)}
+.phase-tabs{display:flex;gap:2px;flex:1;justify-content:center}
+.ptab{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink3);padding:5px 14px;border-radius:20px;text-decoration:none;transition:.15s;white-space:nowrap}
+.ptab:hover{background:var(--p2);color:var(--ink)}
+.ptab.active{background:var(--acc-bg);color:var(--acc)}
+.nav-back{font-size:.78rem;color:var(--ink3);text-decoration:none;transition:.15s;white-space:nowrap}
+.nav-back:hover{color:var(--ink)}
+#progress-bar{position:fixed;top:56px;left:0;height:2px;background:var(--acc);width:0;z-index:200;transition:width .08s}
+
+/* ─── SECTION WRAPPER ─── */
+.wrap{max-width:1080px;margin:0 auto;padding:0 48px}
+section{padding:80px 0}
+.sec-eyebrow{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;
+  margin-bottom:12px}
+.sec-title{font-family:'Fraunces',serif;font-size:2rem;font-weight:700;letter-spacing:-.02em;
+  color:var(--ink);margin-bottom:12px;line-height:1.15}
+.sec-desc{font-size:.9rem;line-height:1.7;color:var(--ink3);max-width:640px;margin-bottom:44px}
+.tag{display:inline-flex;align-items:center;gap:5px;font-family:'DM Mono',monospace;font-size:.58rem;
+  letter-spacing:.1em;text-transform:uppercase;padding:3px 9px;border-radius:5px;border:1px solid;margin-bottom:10px}
+.tag.ai{background:var(--ai-bg);color:var(--ai-c);border-color:var(--ai-bd)}
+.tag.adm{background:var(--adm-bg);color:var(--adm-c);border-color:var(--adm-bd)}
+.tag.mch{background:var(--mch-bg);color:var(--mch-c);border-color:var(--mch-bd)}
+.tag.pass{background:var(--pass-bg);color:var(--pass-c);border-color:var(--pass-bd)}
+.tag.fail{background:var(--fail-bg);color:var(--fail-c);border-color:var(--fail-bd)}
+.tag.warn{background:var(--warn-bg);color:var(--warn-c);border-color:var(--warn-bd)}
+hr.divider{border:none;border-top:1px solid var(--p3)}
+
+/* ─── HERO ─── */
+#hero{padding:140px 0 80px;background:var(--paper)}
+#hero .eyebrow{font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--acc);margin-bottom:20px;opacity:0;transform:translateY(14px)}
+#hero h1{font-family:'Fraunces',serif;font-size:3.2rem;font-weight:700;line-height:1.1;
+  letter-spacing:-.03em;color:var(--ink);margin-bottom:18px;opacity:0;transform:translateY(18px)}
+#hero h1 em{font-style:italic;color:var(--acc)}
+#hero .sub{font-size:1rem;line-height:1.75;color:var(--ink3);max-width:560px;margin-bottom:52px;
+  opacity:0;transform:translateY(14px)}
+.stats-row{display:flex;gap:40px;flex-wrap:wrap}
+.stat{opacity:0;transform:translateY(12px)}
+.stat .n{font-family:'Fraunces',serif;font-size:2.2rem;font-weight:700;color:var(--acc);line-height:1}
+.stat .l{font-size:.75rem;color:var(--ink3);margin-top:4px;font-weight:500}
+
+/* ─── SETUP CARDS ─── */
+.cards-3x2{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.scard{background:#fff;border-radius:var(--r);border:1px solid var(--p3);
+  padding:22px;box-shadow:var(--shadow);opacity:0;transform:translateY(16px)}
+.scard .icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;
+  justify-content:center;font-size:.95rem;margin-bottom:14px}
+.scard h3{font-family:'Fraunces',serif;font-size:.9rem;font-weight:600;color:var(--ink);margin-bottom:8px}
+.scard p{font-size:.78rem;line-height:1.65;color:var(--ink3)}
+.scard.highlight{border-color:var(--adm-bd);background:var(--adm-bg)}
+.scard.highlight h3{color:var(--adm-c)}
+
+/* ─── PIPELINE ─── */
+.pipeline-flow{display:flex;flex-direction:column;align-items:center;gap:0;max-width:680px;margin:0 auto}
+.stage-card{width:100%;background:#fff;border-radius:var(--r);border:1px solid var(--p3);
+  padding:22px 26px;box-shadow:var(--shadow);position:relative;
+  opacity:0;transform:translateY(16px)}
+.stage-card h3{font-family:'Fraunces',serif;font-size:.98rem;font-weight:600;color:var(--ink);margin-bottom:7px}
+.stage-card p{font-size:.8rem;line-height:1.65;color:var(--ink3)}
+.stage-arrow{display:flex;flex-direction:column;align-items:center;height:36px;position:relative}
+.stage-arrow::before{content:'';display:block;width:1px;height:100%;background:var(--p3);position:absolute}
+.stage-arrow::after{content:'';display:block;width:0;height:0;
+  border-left:5px solid transparent;border-right:5px solid transparent;
+  border-top:7px solid var(--p4);position:absolute;bottom:0}
+
+.stage-pair{display:grid;grid-template-columns:1fr 1fr;gap:16px;width:100%;margin-top:16px}
+.stage-pair .stage-card{opacity:0;transform:translateY(16px)}
+
+/* retry table */
+.rt{width:100%;border-collapse:collapse;margin-top:14px;font-size:.76rem}
+.rt th{text-align:left;font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.06em;
+  text-transform:uppercase;color:var(--ink4);padding:6px 10px;border-bottom:1px solid var(--p3)}
+.rt td{padding:8px 10px;border-bottom:1px solid var(--p2);color:var(--ink2);vertical-align:top}
+.rt tr:last-child td{border-bottom:none}
+.rt td:first-child{color:var(--acc);font-family:'DM Mono',monospace;font-size:.7rem}
+
+/* ─── GATE CARDS ─── */
+.gate{background:#fff;border-radius:var(--r);border:1px solid var(--p3);
+  display:flex;align-items:stretch;box-shadow:var(--shadow);
+  opacity:0;transform:translateY(16px);overflow:hidden}
+.gate-body{flex:1;padding:24px 26px}
+.gate-body h3{font-family:'Fraunces',serif;font-size:1rem;font-weight:600;color:var(--ink);margin-bottom:8px}
+.gate-body p{font-size:.8rem;line-height:1.65;color:var(--ink3)}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:14px}
+.chip{font-size:.7rem;padding:3px 10px;border-radius:4px;border:1px solid}
+.chip.mch{background:var(--mch-bg);color:var(--mch-c);border-color:var(--mch-bd)}
+.chip.ai{background:var(--ai-bg);color:var(--ai-c);border-color:var(--ai-bd)}
+.gate-out{display:flex;flex-direction:column;min-width:140px;border-left:1px solid var(--p3)}
+.go-pass{flex:1;background:var(--pass-bg);display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:3px;padding:14px;border-bottom:1px solid var(--pass-bd)}
+.go-fail{flex:1;background:var(--fail-bg);display:flex;align-items:center;justify-content:center;
+  flex-direction:column;gap:3px;padding:14px}
+.go-label{font-family:'DM Mono',monospace;font-size:.62rem;letter-spacing:.08em;text-transform:uppercase;font-weight:600}
+.go-pass .go-label{color:var(--pass-c)}
+.go-fail .go-label{color:var(--fail-c)}
+.go-dest{font-size:.72rem;text-align:center;font-weight:500}
+.go-pass .go-dest{color:var(--pass-c)}
+.go-fail .go-dest{color:var(--fail-c)}
+
+.v-connector{display:flex;justify-content:center;align-items:center;height:40px;position:relative}
+.v-connector::before{content:'';display:block;width:1px;height:100%;background:var(--p3);position:absolute}
+.v-connector .arr{width:0;height:0;border-left:5px solid transparent;border-right:5px solid transparent;
+  border-top:7px solid var(--p4);position:absolute;bottom:0}
+.v-connector.red::before{background:#fca5a5}
+.v-connector.red .arr{border-top-color:#fca5a5}
+
+/* L2 judges grid */
+.l2-card{background:#fff;border-radius:var(--r);border:1px solid var(--p3);
+  padding:28px;box-shadow:var(--shadow);opacity:0;transform:translateY(16px)}
+.l2-card .l2-header{display:flex;align-items:center;gap:12px;margin-bottom:8px}
+.l2-card h3{font-family:'Fraunces',serif;font-size:1.05rem;font-weight:600;color:var(--ink)}
+.l2-card .intro{font-size:.82rem;line-height:1.65;color:var(--ink3);margin-bottom:22px;max-width:680px}
+.judges{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.judge{background:var(--p2);border-radius:8px;border:1px solid var(--p3);padding:14px 16px;
+  opacity:0;transform:translateY(12px)}
+.judge .jn{font-family:'DM Mono',monospace;font-size:.56rem;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--ink4);margin-bottom:6px}
+.judge h4{font-size:.8rem;font-weight:600;color:var(--ink);margin-bottom:5px}
+.judge p{font-size:.72rem;line-height:1.55;color:var(--ink3)}
+.l2-outcomes{display:flex;gap:10px;margin-top:18px}
+.l2-out{flex:1;border-radius:8px;padding:14px 16px;border:1px solid}
+.l2-out.p{background:var(--pass-bg);border-color:var(--pass-bd)}
+.l2-out.f{background:var(--fail-bg);border-color:var(--fail-bd)}
+.l2-out .ol{font-family:'DM Mono',monospace;font-size:.6rem;letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-bottom:4px}
+.l2-out.p .ol{color:var(--pass-c)}
+.l2-out.f .ol{color:var(--fail-c)}
+.l2-out p{font-size:.76rem;line-height:1.55}
+.l2-out.p p{color:var(--pass-c)}
+.l2-out.f p{color:var(--fail-c)}
+
+/* Heal card */
+.heal-card{background:#fff;border-radius:var(--r);border:1px solid var(--p3);
+  padding:28px;box-shadow:var(--shadow);opacity:0;transform:translateY(16px)}
+.heal-card h3{font-family:'Fraunces',serif;font-size:1rem;font-weight:600;color:var(--ink);margin-bottom:8px}
+.heal-card .desc{font-size:.82rem;line-height:1.65;color:var(--ink3);margin-bottom:22px}
+.heal-steps{display:flex;flex-direction:column;gap:12px}
+.heal-step{display:flex;gap:14px;align-items:flex-start}
+.hs-dot{width:22px;height:22px;border-radius:50%;background:var(--ai-bg);border:1.5px solid var(--ai-bd);
+  display:flex;align-items:center;justify-content:center;font-size:.6rem;font-family:'DM Mono',monospace;
+  color:var(--ai-c);font-weight:500;flex-shrink:0;margin-top:1px}
+.heal-step p{font-size:.8rem;line-height:1.6;color:var(--ink3)}
+.heal-step p strong{color:var(--ink2)}
+.heal-outcomes{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px;padding-top:18px;border-top:1px solid var(--p3)}
+.heal-out{border-radius:8px;padding:12px 14px;border:1px solid}
+.heal-out.s{background:var(--pass-bg);border-color:var(--pass-bd)}
+.heal-out.x{background:var(--fail-bg);border-color:var(--fail-bd)}
+.heal-out .hl{font-family:'DM Mono',monospace;font-size:.58rem;letter-spacing:.08em;text-transform:uppercase;font-weight:600;margin-bottom:3px}
+.heal-out.s .hl{color:var(--pass-c)}
+.heal-out.x .hl{color:var(--fail-c)}
+.heal-out p{font-size:.74rem;line-height:1.5}
+.heal-out.s p{color:var(--pass-c)}
+.heal-out.x p{color:var(--fail-c)}
+
+/* ─── CALIBRATION FLOW ─── */
+.calib-flow{display:flex;align-items:stretch;gap:0}
+.calib-node{flex:1;background:#fff;border:1px solid var(--p3);padding:24px;
+  opacity:0;transform:translateY(16px)}
+.calib-node:first-child{border-radius:var(--r) 0 0 var(--r)}
+.calib-node:last-child{border-radius:0 var(--r) var(--r) 0}
+.calib-node.mid{border-left:none;border-right:none;background:var(--adm-bg);border-color:var(--adm-bd)}
+.calib-node h3{font-family:'Fraunces',serif;font-size:.92rem;font-weight:600;color:var(--ink);margin-bottom:8px}
+.calib-node.mid h3{color:var(--adm-c)}
+.calib-node p{font-size:.78rem;line-height:1.65;color:var(--ink3)}
+.calib-sep{display:flex;align-items:center;flex-shrink:0;padding:0 0;
+  background:#fff;border-top:1px solid var(--p3);border-bottom:1px solid var(--p3)}
+.calib-sep span{color:var(--ink4);font-size:.9rem;padding:0 2px}
+.calib-sep.mid{background:var(--adm-bg);border-color:var(--adm-bd)}
+
+/* ─── POOL CARDS ─── */
+.cards-2x2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.pcard{background:#fff;border-radius:var(--r);border:1px solid var(--p3);
+  padding:24px;box-shadow:var(--shadow);opacity:0;transform:translateY(16px)}
+.pcard .icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;
+  justify-content:center;font-size:.95rem;margin-bottom:14px}
+.pcard h3{font-family:'Fraunces',serif;font-size:.92rem;font-weight:600;color:var(--ink);margin-bottom:8px}
+.pcard p{font-size:.78rem;line-height:1.65;color:var(--ink3)}
+.pcard .note{margin-top:12px;padding-top:12px;border-top:1px solid var(--p3);
+  font-size:.72rem;color:var(--ink4);line-height:1.5}
+.pcard .note strong{color:var(--ink3);font-weight:500}
+
+/* ─── FOOTER ─── */
+footer{border-top:1px solid var(--p3);padding:28px 48px;
+  display:flex;justify-content:space-between;align-items:center;
+  max-width:1080px;margin:0 auto}
+footer p{font-size:.78rem;color:var(--ink4)}
+footer a{color:var(--acc);text-decoration:none;font-size:.78rem;font-weight:500}
+footer a:hover{text-decoration:underline}
+
+/* ─── RESPONSIVE ─── */
+@media(max-width:900px){
+  .cards-3x2{grid-template-columns:repeat(2,1fr)}
+  .judges{grid-template-columns:repeat(2,1fr)}
+  .stage-pair{grid-template-columns:1fr}
+}
+@media(max-width:640px){
+  #top-nav{padding:0 20px}.phase-tabs{display:none}
+  .wrap{padding:0 20px}
+  .cards-3x2{grid-template-columns:1fr}
+  .cards-2x2{grid-template-columns:1fr}
+  .judges{grid-template-columns:1fr 1fr}
+  #hero h1{font-size:2.2rem}
+  .calib-flow{flex-direction:column}
+  .calib-node:first-child{border-radius:var(--r) var(--r) 0 0}
+  .calib-node:last-child{border-radius:0 0 var(--r) var(--r)}
+  .calib-sep{display:none}
+  .gate{flex-direction:column}
+  .gate-out{flex-direction:row;border-left:none;border-top:1px solid var(--p3)}
+  footer{flex-direction:column;gap:12px;padding:24px 20px}
+}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav id="top-nav">
+  <a href="/" class="nav-logo">GRIT <span>Pipeline</span></a>
+  <div class="phase-tabs">
+    <a href="#phase-0" class="ptab">Setup</a>
+    <a href="#pipeline" class="ptab">Generation</a>
+    <a href="#validation" class="ptab">Validation</a>
+    <a href="#review" class="ptab">Review</a>
+    <a href="#pool" class="ptab">Pool &amp; Live</a>
+  </div>
+  <a href="/" class="nav-back">← Presentation</a>
+</nav>
+<div id="progress-bar"></div>
+
+<!-- HERO -->
+<section id="hero">
+  <div class="wrap">
+    <div class="eyebrow" id="h-ey">GRIT · Practice Agentic Flow</div>
+    <h1 id="h-h1">From syllabus to <em>student-ready</em> question.</h1>
+    <p class="sub" id="h-sub">A walkthrough of every stage — eight AI judges, six generation stages, automatic healing, zero manual writing.</p>
+    <div class="stats-row">
+      <div class="stat" id="st1"><div class="n">6</div><div class="l">Generation Stages</div></div>
+      <div class="stat" id="st2"><div class="n">8</div><div class="l">AI Quality Judges</div></div>
+      <div class="stat" id="st3"><div class="n">4</div><div class="l">Pipeline Phases</div></div>
+      <div class="stat" id="st4"><div class="n">4×</div><div class="l">Auto-Heal Attempts</div></div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- PHASE 0 -->
+<section id="phase-0">
+  <div class="wrap">
+    <div class="sec-eyebrow tag adm" style="display:inline-block">Phase 0 · Admin</div>
+    <h2 class="sec-title">Setup &amp; Configuration</h2>
+    <p class="sec-desc">Before any questions are generated, the admin provides source material and approves what to test. Calibration is blocked until the concept plan is signed off.</p>
+    <div class="cards-3x2">
+      <div class="scard" id="sc1">
+        <div class="icon" style="background:var(--adm-bg)">📄</div>
+        <div class="tag adm">Admin</div>
+        <h3>Syllabus Upload</h3>
+        <p>Paste text directly, or upload a PDF or DOCX. The server extracts plain text before any processing begins. Scanned image PDFs surface a clear error.</p>
+      </div>
+      <div class="scard" id="sc2">
+        <div class="icon" style="background:var(--ai-bg)">🧠</div>
+        <div class="tag ai">AI</div>
+        <h3>Concept Extraction</h3>
+        <p>An AI model analyses the syllabus and identifies 4–12 distinct question concepts — the underlying skills to test — each with a recommended pattern count.</p>
+      </div>
+      <div class="scard highlight" id="sc3">
+        <div class="icon" style="background:var(--adm-bg)">✓</div>
+        <div class="tag adm">Admin · Blocks Calibration</div>
+        <h3>Approve Concept Plan</h3>
+        <p>Admin reviews and adjusts the concept list and per-concept question counts. <strong>Generation cannot begin until this step is complete.</strong></p>
+      </div>
+      <div class="scard" id="sc4">
+        <div class="icon" style="background:var(--ai-bg)">📝</div>
+        <div class="tag ai">AI</div>
+        <h3>Sample Question Parsing</h3>
+        <p>Admin's sample questions are parsed into structured objects. Used to derive the intended format and serve as reference material for the format-match judge.</p>
+      </div>
+      <div class="scard" id="sc5">
+        <div class="icon" style="background:var(--mch-bg)">📐</div>
+        <div class="tag mch">Mechanical</div>
+        <h3>Format Profile Derivation</h3>
+        <p>Mechanical analysis of parsed samples → average stem length, preamble frequency, code snippet frequency, register. Injected into Stage 1 prompts to reduce format-mismatch rejections.</p>
+      </div>
+      <div class="scard" id="sc6">
+        <div class="icon" style="background:var(--ai-bg)">🔍</div>
+        <div class="tag ai">AI</div>
+        <h3>Question Type Analysis</h3>
+        <p>Infers which question formats (MCQ, CODE_MCQ, FIB, MULTI_MCQ, TEXT_ANSWER) appear in the intended assessment. Ensures calibration covers every expected format.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- PIPELINE -->
+<section id="pipeline">
+  <div class="wrap">
+    <div class="sec-eyebrow tag ai" style="display:inline-block">Core Pipeline</div>
+    <h2 class="sec-title">Staged Generation — 6 Steps</h2>
+    <p class="sec-desc">Every MCQ passes through a six-stage pipeline. Each stage handles one focused task — dramatically reducing broken or inconsistent output compared to single-shot generation.</p>
+
+    <div class="pipeline-flow">
+
+      <div class="stage-card" id="sg1">
+        <div class="tag ai">Stage 1 · AI</div>
+        <h3>Stem Draft</h3>
+        <p>Writes the question stem only. No options or answer at this stage. Tagged with a concept label and Bloom's taxonomy level. The format profile (stem length, preamble style, register) is injected here to steer style. Up to 2 retries on parse errors.</p>
+      </div>
+      <div class="stage-arrow"></div>
+
+      <div class="stage-card" id="sg2">
+        <div class="tag ai">Stage 2 · AI</div>
+        <h3>Canonical Solution</h3>
+        <p>Model derives the single correct answer. All chain-of-thought working goes into a scratchpad field — the student-facing explanation must be clean prose only. A <em>scratchpad guard</em> retries if reasoning phrases like "let me" or "wait," leak into the explanation. A <em>numeric consistency guard</em> checks that numbers in the explanation agree with the keyed answer.</p>
+      </div>
+      <div class="stage-arrow"></div>
+
+      <div class="stage-card" id="sg2b">
+        <div class="tag ai">Stage 2b · AI</div>
+        <h3>Independent Verifier</h3>
+        <p>A separate model re-derives the answer from the stem alone, without seeing Stage 2's reasoning. Agreement → pipeline proceeds. Disagreement → Stage 2 retried once. If disagreement persists, it is flagged in the audit trail and the Pre-L2 Gate synthesises a fail for the arithmetic sub-judge — avoiding the cost of eight AI calls on a suspect question.</p>
+      </div>
+      <div class="stage-arrow"></div>
+
+      <div class="stage-card" id="sg35">
+        <div class="tag ai">Stage 3.5 · AI</div>
+        <h3>Misconception Planner</h3>
+        <p>Identifies 3 primary + up to 2 alternate misconceptions specific to this question — concrete conceptual mistakes (e.g. "student applies the rule backwards"), not generic error classes. The 3 primary misconceptions seed the three distractor slots. Alternates act as reserves if a primary collision occurs in Stage 5.</p>
+      </div>
+      <div class="stage-arrow"></div>
+
+      <div class="stage-card" id="sg4">
+        <div class="tag ai" style="background:#faf5ff;color:#7c3aed;border-color:#ddd6fe">Stage 4 · AI × 3 Parallel</div>
+        <h3>Distractor Generation</h3>
+        <p>Three AI calls run simultaneously, one per misconception. Each call produces one plausible-but-wrong option tied to that specific misunderstanding. Rules enforced: same shape and units as the correct answer, clearly wrong for a knowledgeable student, no "all of the above" patterns.</p>
+      </div>
+      <div class="stage-arrow"></div>
+
+      <div class="stage-card" id="sg5">
+        <div class="tag mch">Stage 5 · Mechanical</div>
+        <h3>Assembly + Collision Check</h3>
+        <p>Correct option and three distractors are shuffled using a deterministic algorithm. The letter marker (A–D) is assigned by position after shuffle. Two dedup passes: exact-string match, then Dice character-bigram similarity ≥ 0.92. A collision triggers a slot regeneration using alternate misconceptions. If no alternates remain, the question is discarded.</p>
+      </div>
+      <div class="stage-arrow"></div>
+
+      <div class="stage-card" id="sg6">
+        <div class="tag ai">Stage 6 · AI</div>
+        <h3>Self-Critique</h3>
+        <p>Model audits its own assembled question as a senior reviewer would. Re-derives the correct answer, checks that exactly one option is defensible, verifies all distractors are tied to real misconceptions, checks for ambiguous or trick phrasing, and confirms on-syllabus and correct Bloom's level.</p>
+        <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap">
+          <span style="font-size:.72rem;background:var(--pass-bg);color:var(--pass-c);padding:3px 10px;border-radius:4px;border:1px solid var(--pass-bd)">Pass → Layer 1 Validation</span>
+          <span style="font-size:.72rem;background:var(--fail-bg);color:var(--fail-c);padding:3px 10px;border-radius:4px;border:1px solid var(--fail-bd)">Fail → Targeted Retry</span>
+        </div>
+      </div>
+
+      <!-- Targeted Retry + Fallback side-by-side -->
+      <div class="stage-pair">
+        <div class="stage-card" id="sg-tr">
+          <div class="tag warn">Targeted Retry · AI</div>
+          <h3>Classification-Aware Re-Run</h3>
+          <p>On Stage 6 fail, the orchestrator classifies the failure pattern and re-runs only the stages responsible — not the entire question from scratch.</p>
+          <table class="rt">
+            <tr><th>Failure</th><th>Re-runs</th></tr>
+            <tr><td>Distractor only</td><td>Stage 4 + 5 + 6</td></tr>
+            <tr><td>Ambiguous answer</td><td>Stage 2 + 5 + 6</td></tr>
+            <tr><td>Answer + distractors</td><td>Stage 2 → 4 → 5 → 6</td></tr>
+          </table>
+        </div>
+        <div class="stage-card" id="sg-ss" style="border-style:dashed;border-color:var(--p4);background:var(--p2)">
+          <div class="tag mch">Single-Shot Fallback · Legacy</div>
+          <h3>Last-Resort Generator</h3>
+          <p>If every parallel staged candidate fails to produce a valid assembled question, the system falls back to a legacy single-shot generator — one AI call produces the full MCQ in one response.</p>
+          <p style="margin-top:10px;font-size:.75rem;color:var(--ink4)">Permanently tagged in the audit trail as <code style="font-family:'DM Mono',monospace;background:var(--p3);padding:1px 5px;border-radius:3px">flagOn: false</code>. Still enters Layer 1 normally.</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- VALIDATION -->
+<section id="validation">
+  <div class="wrap">
+    <div class="sec-eyebrow tag mch" style="display:inline-block">Automated</div>
+    <h2 class="sec-title">Three Quality Gates</h2>
+    <p class="sec-desc">Every question passes through these gates in sequence. Each gate acts as a filter — questions that don't meet the bar are discarded or sent to repair before ever reaching a student.</p>
+
+    <!-- L1 -->
+    <div class="gate" id="g-l1">
+      <div class="gate-body">
+        <div class="tag mch" style="display:inline-flex">Layer 1</div>
+        <h3>Mechanical Validation</h3>
+        <p>Fast, deterministic checks with no AI cost. A question failing here is discarded immediately and never enters the AI judge queue.</p>
+        <div class="chips">
+          <span class="chip mch">Blank fields</span>
+          <span class="chip mch">Word count 6–100</span>
+          <span class="chip mch">Option count</span>
+          <span class="chip mch">Correct answer valid</span>
+          <span class="chip mch">Bloom's level</span>
+          <span class="chip mch">Out-of-scope keywords</span>
+          <span class="chip ai">AI syllabus alignment</span>
+          <span class="chip ai">Cosine dedup ≥ 0.85</span>
+        </div>
+      </div>
+      <div class="gate-out">
+        <div class="go-pass">
+          <div class="go-label">✓ Pass</div>
+          <div class="go-dest">→ Pre-L2 Gate</div>
+        </div>
+        <div class="go-fail">
+          <div class="go-label">✗ Fail</div>
+          <div class="go-dest">Discard</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="v-connector"><div class="arr"></div></div>
+
+    <!-- Pre-L2 -->
+    <div class="gate" id="g-pl2">
+      <div class="gate-body">
+        <div class="tag mch" style="display:inline-flex">Pre-L2 Gate</div>
+        <h3>Structural Sanity Check</h3>
+        <p>Cheap deterministic check before committing to 8 expensive AI calls. Verifies exactly 4 options, a valid A–D letter, and a non-empty explanation. If Stage 2b's verifier persistently disagreed, this gate synthesises a fail result for the arithmetic and answer-unambiguous sub-judges directly — saving cost on questions already flagged as suspect. Conversely, if Stage 2b agreed, the arithmetic sub-judge is skipped in L2.</p>
+        <div class="chips" style="margin-top:14px">
+          <span class="chip mch">Exactly 4 options</span>
+          <span class="chip mch">Valid letter A–D</span>
+          <span class="chip mch">Non-empty explanation</span>
+          <span class="chip ai">Stage 2b verifier flag</span>
+        </div>
+      </div>
+      <div class="gate-out">
+        <div class="go-pass">
+          <div class="go-label">✓ Pass</div>
+          <div class="go-dest">→ Layer 2</div>
+        </div>
+        <div class="go-fail">
+          <div class="go-label">✗ Fail</div>
+          <div class="go-dest">Discard</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="v-connector"><div class="arr"></div></div>
+
+    <!-- L2 -->
+    <div class="l2-card" id="g-l2">
+      <div class="l2-header">
+        <div class="tag ai" style="display:inline-flex;margin-bottom:0">Layer 2 · AI Judge</div>
+        <h3>8 Sub-Judges in Parallel</h3>
+      </div>
+      <p class="intro">Eight independent AI sub-judges run simultaneously, each with a separate focused prompt examining one quality dimension. A single genuine fail from any sub-judge causes the overall result to fail → Auto-Heal.</p>
+      <div class="judges">
+        <div class="judge" id="j1"><div class="jn">Judge 01</div><h4>Syllabus Alignment</h4><p>Topic is covered by the syllabus, explicitly or implicitly.</p></div>
+        <div class="judge" id="j2"><div class="jn">Judge 02</div><h4>Unambiguity</h4><p>Exactly one option is defensible; all wrong options are clearly incorrect.</p></div>
+        <div class="judge" id="j3"><div class="jn">Judge 03</div><h4>Factual Correctness</h4><p>The keyed answer is objectively correct in the subject domain.</p></div>
+        <div class="judge" id="j4"><div class="jn">Judge 04</div><h4>Distractor Quality</h4><p>Every wrong option is clearly wrong for a knowledgeable student.</p></div>
+        <div class="judge" id="j5"><div class="jn">Judge 05</div><h4>No Trick Wording</h4><p>No double negatives, confusing except/not/never constructs, or gotcha phrasing.</p></div>
+        <div class="judge" id="j6"><div class="jn">Judge 06</div><h4>Format Match</h4><p>Tone, complexity, and style match the admin's sample questions.</p></div>
+        <div class="judge" id="j7"><div class="jn">Judge 07</div><h4>Arithmetic Accuracy</h4><p>Every calculation is mathematically correct. Skipped when Stage 2b verifier already agreed.</p></div>
+        <div class="judge" id="j8"><div class="jn">Judge 08</div><h4>Out-of-Scope Check</h4><p>Doesn't require knowledge from the explicit out-of-scope list. Cross-checked vs alignment to prevent false positives.</p></div>
+      </div>
+      <div class="l2-outcomes">
+        <div class="l2-out p">
+          <div class="ol">✓ All pass</div>
+          <p>Calibration → Admin review<br/>Pool generation → Auto-approve</p>
+        </div>
+        <div class="l2-out f">
+          <div class="ol">✗ Any fail</div>
+          <p>→ Auto-Heal pipeline<br/>Failure reasons become repair instructions</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="v-connector red"><div class="arr" style="border-top-color:#fca5a5"></div></div>
+
+    <!-- Auto-Heal -->
+    <div class="heal-card" id="g-heal">
+      <div class="tag ai" style="display:inline-flex;margin-bottom:10px">Auto-Heal · AI</div>
+      <h3>Surgical Repair — Up to 4 Attempts</h3>
+      <p class="desc">Rather than discarding, the system attempts targeted repair. Specific failure reasons from all failing sub-judges are fed back as concrete repair instructions. The original stem is always preserved — only options, correct answer, and explanation are regenerated.</p>
+      <div class="heal-steps">
+        <div class="heal-step">
+          <div class="hs-dot">1</div>
+          <p>Extract all Layer 1 and Layer 2 failure criterion names with specific sub-judge rationales.</p>
+        </div>
+        <div class="heal-step">
+          <div class="hs-dot">2</div>
+          <p>Include prior-attempt feedback as <strong>escalating pressure</strong> — if attempt 2 failed, attempt 3 receives both the original reasons and why attempt 2 also failed.</p>
+        </div>
+        <div class="heal-step">
+          <div class="hs-dot">3</div>
+          <p>Generator returns only the corrected parts: new options, new correct answer, new explanation. Stem unchanged.</p>
+        </div>
+        <div class="heal-step">
+          <div class="hs-dot">4</div>
+          <p>Healed candidate re-validated through <strong>full Layer 1 + Layer 2</strong>. Every attempt recorded on the original question's heal history.</p>
+        </div>
+      </div>
+      <div class="heal-outcomes">
+        <div class="heal-out s">
+          <div class="hl">Success</div>
+          <p>Inserted as new row with <code style="font-family:'DM Mono',monospace;font-size:.7rem">supersedesQuestionId</code> pointing to original. Original marked superseded.</p>
+        </div>
+        <div class="heal-out x">
+          <div class="hl">Budget Exhausted</div>
+          <p>Question auto-rejected. Full heal history preserved for audit. Concurrent admin edits are protected by optimistic concurrency.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- REVIEW -->
+<section id="review">
+  <div class="wrap">
+    <div class="sec-eyebrow tag adm" style="display:inline-block">Phase 1 · Admin</div>
+    <h2 class="sec-title">Calibration Review</h2>
+    <p class="sec-desc">A small sample batch is generated and shown to the admin before committing to full pool generation. The human-in-the-loop checkpoint ensures the template is right before hundreds of questions are auto-generated.</p>
+
+    <div class="calib-flow">
+      <div class="calib-node" id="cn1">
+        <div class="tag ai" style="display:inline-flex;margin-bottom:10px">Generate</div>
+        <h3>Calibration Batch</h3>
+        <p>Up to 15 questions generated across all approved concepts. Full pipeline applies — each passes Stage 1–6, L1, Pre-L2 Gate, L2, and Auto-Heal before the admin sees it. Admin sees live progress as questions arrive.</p>
+      </div>
+      <div class="calib-sep"><span>→</span></div>
+      <div class="calib-node mid" id="cn2">
+        <div class="tag adm" style="display:inline-flex;margin-bottom:10px">Admin</div>
+        <h3>Review Each Question</h3>
+        <p><strong>Approve</strong> — question seeds the pool.<br/><br/><strong>Reject with notes</strong> — the admin's description of what was wrong becomes a <code style="font-family:'DM Mono',monospace;font-size:.72rem">customRefinement</code> hint in the next generation attempt.</p>
+      </div>
+      <div class="calib-sep mid"><span>→</span></div>
+      <div class="calib-node" id="cn3">
+        <div class="tag pass" style="display:inline-flex;margin-bottom:10px">Approved</div>
+        <h3>Seed the Pool</h3>
+        <p>Approved calibration questions immediately enter the pool. They seed Phase 2's concept-targeted generation run and count toward per-concept targets.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- POOL & LIVE -->
+<section id="pool">
+  <div class="wrap">
+    <div class="sec-eyebrow tag mch" style="display:inline-block">Phase 2 + 3</div>
+    <h2 class="sec-title">Pool Generation &amp; Live Top-Up</h2>
+    <p class="sec-desc">After calibration is approved, the system fills and maintains the question pool autonomously — no further human input required for each individual question.</p>
+
+    <div class="cards-2x2">
+      <div class="pcard" id="pp1">
+        <div class="icon" style="background:var(--ai-bg)">⚡</div>
+        <div class="tag ai" style="display:inline-flex;margin-bottom:10px">Phase 2 · Automated</div>
+        <h3>Full Pool Generation</h3>
+        <p>Concept-targeted batches fill the pool to the size defined by the admin-approved concept plan. Pool questions are auto-approved — calibration already validated the template, so individual sign-off isn't needed.</p>
+        <div class="note"><strong>Dedup:</strong> Cosine similarity checked against the entire existing pool on each run, not just the current batch.</div>
+      </div>
+      <div class="pcard" id="pp2">
+        <div class="icon" style="background:#faf5ff">🔀</div>
+        <div class="tag" style="display:inline-flex;margin-bottom:10px;background:#faf5ff;color:#7c3aed;border:1px solid #ddd6fe">Variation</div>
+        <h3>Variation Generation</h3>
+        <p>Creates alternate versions of approved calibration questions — same concept, different numbers, variable names, or scenario. Expands the pool efficiently without new concept work.</p>
+        <div class="note"><strong>Admin review required:</strong> Variations are not auto-approved. Each carries a <code style="font-family:'DM Mono',monospace">parentQuestionId</code> lineage link.</div>
+      </div>
+      <div class="pcard" id="pp3">
+        <div class="icon" style="background:var(--pass-bg)">🔄</div>
+        <div class="tag pass" style="display:inline-flex;margin-bottom:10px">Phase 3 · Live</div>
+        <h3>Auto Top-Up</h3>
+        <p>As students exhaust their unseen question inventory, the system automatically triggers background generation. New questions become available for subsequent attempts without blocking the current one.</p>
+        <div class="note">Trigger: unseen question count drops below the configured minimum threshold.</div>
+      </div>
+      <div class="pcard" id="pp4">
+        <div class="icon" style="background:var(--p2)">📊</div>
+        <div class="tag mch" style="display:inline-flex;margin-bottom:10px">Automated</div>
+        <h3>Saturation Detection</h3>
+        <p>The system tracks yield rate (questions accepted ÷ questions generated) per run. Two consecutive runs below 20% yield with ≥ 50 questions in the pool → pool marked saturated and excluded from further auto top-up.</p>
+        <div class="note">Saturation is cleared automatically if new syllabus content is added or the concept plan is updated.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+<footer>
+  <p>GRIT Practice Agentic Flow · NxtWave Learning Pod</p>
+  <a href="/">← Back to Presentation</a>
+</footer>
+
+<script>
+gsap.registerPlugin(ScrollTrigger);
+
+/* ── PROGRESS BAR ── */
+window.addEventListener('scroll',()=>{
+  const pct=window.scrollY/(document.body.scrollHeight-window.innerHeight);
+  document.getElementById('progress-bar').style.width=(pct*100)+'%';
+});
+
+/* ── NAV ACTIVE TAB ── */
+const sections=['phase-0','pipeline','validation','review','pool'];
+const tabs=document.querySelectorAll('.ptab');
+window.addEventListener('scroll',()=>{
+  let cur='';
+  sections.forEach(id=>{
+    const el=document.getElementById(id);
+    if(el&&window.scrollY>=el.offsetTop-100) cur=id;
+  });
+  tabs.forEach(t=>t.classList.toggle('active',t.getAttribute('href')==='#'+cur));
+},{passive:true});
+
+/* ── HERO animations (on load) ── */
+gsap.to('#h-ey',{opacity:1,y:0,duration:.5,ease:'power3.out',delay:.15});
+gsap.to('#hero h1',{opacity:1,y:0,duration:.55,ease:'power3.out',delay:.28});
+gsap.to('#h-sub',{opacity:1,y:0,duration:.5,ease:'power3.out',delay:.42});
+gsap.to(['#st1','#st2','#st3','#st4'],{opacity:1,y:0,duration:.4,ease:'power2.out',stagger:.08,delay:.55});
+
+/* ── Generic ScrollTrigger helper ── */
+function reveal(selector,opts={}){
+  const els=typeof selector==='string'?[...document.querySelectorAll(selector)]:[...selector];
+  els.forEach((el,i)=>{
+    ScrollTrigger.create({
+      trigger:el,start:'top 90%',
+      onEnter:()=>gsap.to(el,{
+        opacity:1,y:0,
+        duration:opts.dur||.48,
+        ease:opts.ease||'power2.out',
+        delay:(opts.stagger||0)*i+(opts.delay||0)
+      })
+    });
+  });
+}
+
+/* Phase 0 */
+reveal('.scard',{stagger:.07,dur:.44});
+
+/* Pipeline stage cards */
+['#sg1','#sg2','#sg2b','#sg35','#sg4','#sg5','#sg6'].forEach((id,i)=>{
+  const el=document.querySelector(id);
+  if(!el) return;
+  ScrollTrigger.create({trigger:el,start:'top 90%',
+    onEnter:()=>gsap.to(el,{opacity:1,y:0,duration:.46,ease:'power2.out',delay:i*.04})});
+});
+reveal(['#sg-tr','#sg-ss'],{stagger:.1,dur:.44});
+
+/* Gate cards */
+reveal(['#g-l1','#g-pl2','#g-l2','#g-heal'],{dur:.5});
+
+/* Judges stagger in 4-wide rows */
+[...document.querySelectorAll('.judge')].forEach((el,i)=>{
+  ScrollTrigger.create({trigger:el,start:'top 92%',
+    onEnter:()=>gsap.to(el,{opacity:1,y:0,duration:.38,ease:'power2.out',delay:(i%4)*.06})});
+});
+
+/* Calibration nodes */
+reveal('.calib-node',{stagger:.12,dur:.44});
+
+/* Pool cards */
+reveal('.pcard',{stagger:.08,dur:.44});
+</script>
+</body>
+</html>
