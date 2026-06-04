@@ -613,36 +613,36 @@ html,body{width:100%;height:100%;background:var(--paper);font-family:'DM Sans',s
 
 <!-- ══ S7 · STAGE 3: MEMORY & IMPROVEMENT ══════════════════════════════════ -->
 <div class="slide" id="s7" style="padding:44px 64px;justify-content:center">
- <p class="ey a1">Stage 3 · Deep Dive</p>
- <h2 class="a2" style="font-family:'Fraunces',serif;font-size:1.75rem;font-weight:600;letter-spacing:-.02em;color:var(--ink);margin:8px 0">Memory &amp; Improvement Loop</h2>
+ <p class="ey a1">Stage 3 · Auto-Heal</p>
+ <h2 class="a2" style="font-family:'Fraunces',serif;font-size:1.75rem;font-weight:600;letter-spacing:-.02em;color:var(--ink);margin:8px 0">Failed questions don't get discarded. They get fixed.</h2>
  <div style="display:grid;grid-template-columns:1fr 1.1fr;gap:32px;margin-top:22px" class="a3">
   <div class="steps">
    <div class="step act">
     <div class="sn">1</div>
     <div>
-     <h4>Rejected questions are stored</h4>
-     <p>Every question that fails validation is logged — not discarded. The failure reason is stored alongside the question itself.</p>
+     <h4>L2 fails — specific reasons extracted</h4>
+     <p>Each failing sub-judge returns a concrete reason, not just "fail". E.g. <em>"Distractor B is indistinguishable from the correct answer."</em></p>
     </div>
    </div>
    <div class="step act">
     <div class="sn">2</div>
     <div>
-     <h4>Agent learns from the failures</h4>
-     <p>Before the next generation run, the agent reviews the rejection log. It uses this context to adjust its approach and avoid the same patterns.</p>
+     <h4>Only broken parts regenerated</h4>
+     <p>The stem is always preserved. The system rewrites only what failed — options, answer, or explanation — based on which sub-judges rejected it.</p>
     </div>
    </div>
    <div class="step act">
     <div class="sn">3</div>
     <div>
-     <h4>Quality improves with each run</h4>
-     <p>First-time pass rate goes up over time. Fewer rejections mean faster pool fill. The system becomes more efficient without any additional human input.</p>
+     <h4>Re-validated from scratch</h4>
+     <p>The repaired candidate re-runs the full L1 mechanical checks and all 8 L2 AI sub-judges. No shortcuts.</p>
     </div>
    </div>
    <div class="step act">
     <div class="sn">4</div>
     <div>
-     <h4>Compound improvement loop</h4>
-     <p>This is not a one-time generation — it's a continuously self-improving system. Each cycle makes the next one better.</p>
+     <h4>Up to 4 attempts, escalating pressure</h4>
+     <p>Each retry carries all prior failure history. If all 4 are exhausted → <code style="font-size:.72rem;background:var(--rose-bg);color:var(--rose);padding:1px 5px;border-radius:4px">auto_rejected</code>, full history preserved.</p>
     </div>
    </div>
   </div>
@@ -654,30 +654,34 @@ html,body{width:100%;height:100%;background:var(--paper);font-family:'DM Sans',s
       <div class="cpp-dot" style="background:#fbbf24"></div>
       <div class="cpp-dot" style="background:#34d399"></div>
      </div>
-     <div class="cpp-ttl">Memory log entry</div>
+     <div class="cpp-ttl">heal_trace · question_id: q_8a3f</div>
     </div>
     <div class="cpp-rows">
      <div class="cpp-row">
-      <span class="cpp-c">question_id</span>
-      <span class="tag t-fail">Rejected</span>
+      <span class="cpp-c">attempt_1</span>
+      <span style="display:flex;align-items:center;gap:6px"><span class="tag t-fail">FAIL</span><span style="font-size:.7rem;color:var(--ink3)">distractor_quality</span></span>
      </div>
      <div class="cpp-row">
-      <span class="cpp-c">failure_reason</span>
-      <span class="tag t-adm">Logged</span>
+      <span class="cpp-c">attempt_2</span>
+      <span style="display:flex;align-items:center;gap:6px"><span class="tag t-fail">FAIL</span><span style="font-size:.7rem;color:var(--ink3)">unambiguity</span></span>
      </div>
      <div class="cpp-row">
-      <span class="cpp-c">skill_tag</span>
-      <span class="tag t-acc">Tracked</span>
+      <span class="cpp-c">attempt_3</span>
+      <span class="tag t-acc">PASS ✓</span>
      </div>
      <div class="cpp-row">
-      <span class="cpp-c">pattern_flag</span>
-      <span class="tag t-ai">Learned</span>
+      <span class="cpp-c">stem</span>
+      <span class="tag t-ai">Preserved</span>
+     </div>
+     <div class="cpp-row">
+      <span class="cpp-c">lineage</span>
+      <span class="tag t-adm">supersedesQuestionId</span>
      </div>
     </div>
    </div>
    <div style="padding:16px 18px;background:var(--p2);border:1px solid var(--p3);border-radius:var(--r);font-size:.8rem;line-height:1.6;color:var(--ink2)">
-    <strong style="display:block;margin-bottom:4px;color:var(--ink)">Why this matters</strong>
-    The system doesn't just get told what's wrong — it actively incorporates that feedback into future behaviour. Over time, rejection rates fall and first-pass quality rises automatically.
+    <strong style="display:block;margin-bottom:4px;color:var(--ink)">How healing works</strong>
+    Each failing L2 sub-judge returns a specific reason. The system regenerates only what failed — options, answer, or explanation. The original stem is never touched. Up to 4 attempts, each carrying the full history of prior failures as escalating feedback.
    </div>
   </div>
  </div>
