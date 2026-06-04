@@ -118,7 +118,8 @@ html,body{width:100%;height:100%;background:var(--paper);font-family:'DM Sans',s
 #s2{padding:52px 68px;justify-content:center}
 #s2 h2{font-family:'Fraunces',serif;font-size:2rem;font-weight:600;letter-spacing:-.02em;color:var(--ink);margin:8px 0 28px;line-height:1.2}
 #s2 .g{display:grid;grid-template-columns:1fr 1fr 1fr;gap:18px}
-.pc{background:var(--p2);border:1px solid var(--p3);border-radius:var(--r);padding:26px 22px;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden}
+.pc{background:var(--p2);border:1px solid var(--p3);border-radius:var(--r);padding:26px 22px;display:flex;flex-direction:column;gap:10px;position:relative;overflow:hidden;justify-content:space-between}
+.pc p{margin-top:auto}
 .pc::before{content:'';position:absolute;top:0;left:0;right:0;height:3px}
 .pc.r1::before{background:var(--rose)}
 .pc.r2::before{background:var(--amr)}
@@ -395,7 +396,7 @@ html,body{width:100%;height:100%;background:var(--paper);font-family:'DM Sans',s
   <div class="pc r1">
    <div class="pn">10</div>
    <h3>Skills</h3>
-   <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:8px">
+   <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:auto">
     <span style="font-size:.68rem;font-family:'DM Mono',monospace;padding:3px 9px;border-radius:20px;background:var(--acc-bg);border:1px solid var(--acc-bd);color:var(--acc);white-space:nowrap">Computational Thinking</span>
     <span style="font-size:.68rem;font-family:'DM Mono',monospace;padding:3px 9px;border-radius:20px;background:var(--acc-bg);border:1px solid var(--acc-bd);color:var(--acc);white-space:nowrap">UI Engineering</span>
     <span style="font-size:.68rem;font-family:'DM Mono',monospace;padding:3px 9px;border-radius:20px;background:var(--acc-bg);border:1px solid var(--acc-bd);color:var(--acc);white-space:nowrap">CS Fundamentals</span>
@@ -411,7 +412,7 @@ html,body{width:100%;height:100%;background:var(--paper);font-family:'DM Sans',s
   <div class="pc r2">
    <div class="pn" style="font-size:2.2rem;letter-spacing:-.02em">Manual</div>
    <h3>Time-intensive creation</h3>
-   <p>Each question requires expert writing, distractor crafting, and full verification — a slow process that doesn't scale across 8 tracks.</p>
+   <p>Each question requires expert writing, distractor crafting, and full verification — a slow process that doesn't scale across 10 skills.</p>
   </div>
   <div class="pc r3">
    <div class="pn">∞</div>
