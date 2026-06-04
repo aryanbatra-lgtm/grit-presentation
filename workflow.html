@@ -62,16 +62,24 @@ section{padding:80px 0}
 hr.divider{border:none;border-top:1px solid var(--p3)}
 
 /* ─── HERO ─── */
+@keyframes heroUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:none}}
 #hero{padding:140px 0 80px;background:var(--paper)}
+#hero .wrap > *{animation:heroUp .55s cubic-bezier(0.22,1,0.36,1) both}
+#hero .eyebrow{animation-delay:.05s}
+#hero h1{animation-delay:.15s}
+#hero .sub{animation-delay:.25s}
+.stats-row .stat:nth-child(1){animation:heroUp .45s cubic-bezier(0.22,1,0.36,1) .35s both}
+.stats-row .stat:nth-child(2){animation:heroUp .45s cubic-bezier(0.22,1,0.36,1) .42s both}
+.stats-row .stat:nth-child(3){animation:heroUp .45s cubic-bezier(0.22,1,0.36,1) .49s both}
+.stats-row .stat:nth-child(4){animation:heroUp .45s cubic-bezier(0.22,1,0.36,1) .56s both}
 #hero .eyebrow{font-family:'DM Mono',monospace;font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;
-  color:var(--acc);margin-bottom:20px;opacity:0;transform:translateY(14px)}
+  color:var(--acc);margin-bottom:20px}
 #hero h1{font-family:'Fraunces',serif;font-size:3.2rem;font-weight:700;line-height:1.1;
-  letter-spacing:-.03em;color:var(--ink);margin-bottom:18px;opacity:0;transform:translateY(18px)}
+  letter-spacing:-.03em;color:var(--ink);margin-bottom:18px}
 #hero h1 em{font-style:italic;color:var(--acc)}
-#hero .sub{font-size:1rem;line-height:1.75;color:var(--ink3);max-width:560px;margin-bottom:52px;
-  opacity:0;transform:translateY(14px)}
+#hero .sub{font-size:1rem;line-height:1.75;color:var(--ink3);max-width:560px;margin-bottom:52px}
 .stats-row{display:flex;gap:40px;flex-wrap:wrap}
-.stat{opacity:0;transform:translateY(12px)}
+.stat{}
 .stat .n{font-family:'Fraunces',serif;font-size:2.2rem;font-weight:700;color:var(--acc);line-height:1}
 .stat .l{font-size:.75rem;color:var(--ink3);margin-top:4px;font-weight:500}
 
@@ -649,11 +657,7 @@ window.addEventListener('scroll',()=>{
   tabs.forEach(t=>t.classList.toggle('active',t.getAttribute('href')==='#'+cur));
 },{passive:true});
 
-/* ── HERO animations (on load) ── */
-gsap.to('#h-ey',{opacity:1,y:0,duration:.5,ease:'power3.out',delay:.15});
-gsap.to('#hero h1',{opacity:1,y:0,duration:.55,ease:'power3.out',delay:.28});
-gsap.to('#h-sub',{opacity:1,y:0,duration:.5,ease:'power3.out',delay:.42});
-gsap.to(['#st1','#st2','#st3','#st4'],{opacity:1,y:0,duration:.4,ease:'power2.out',stagger:.08,delay:.55});
+/* ── HERO: visible immediately, subtle entrance via CSS ── */
 
 /* ── Generic ScrollTrigger helper ── */
 function reveal(selector,opts={}){
